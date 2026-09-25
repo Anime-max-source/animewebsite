@@ -1,0 +1,569 @@
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { INITIAL_PRODUCTS } from '../utils/seedData'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { isClerkConfigured, OWNER_CLERK_ID, isOwnerUser } from '../lib/clerkClient'
+
+const AppContext = createContext(null)
+
+const PRODUCTS_STORAGE_KEY = 'animemax_products_v2'
+const ORDERS_STORAGE_KEY = 'animemax_orders_v1'
+const PROFILES_STORAGE_KEY = 'animemax_profiles_v1'
+const MOCK_USER_STORAGE_KEY = 'animemax_mock_user_v1'
+const BANNERS_STORAGE_KEY = 'animemax_banners_v1'
+
+export const INITIAL_BANNERS = {
+  hero: {
+    section: 'hero',
+    eyebrow_tag: 'Exclusive Season Drop',
+    headline: 'GET UP TO 50% OFF',
+    subtext: 'Authentic scale figures, heavy-weight embroidered hoodies, and holographic wall scrolls. Fresh Akihabara import shipments.',
+    cta_text: 'Get Discount',
+    cta_link: '#catalog-view',
+    image_url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&auto=format&fit=crop&q=80',
+    updated_at: new Date().toISOString()
+  },
+  weekly_drop: {
+    section: 'weekly_drop',
+    eyebrow_tag: 'Weekly Drop',
+    headline: 'New Arrivals — Fresh Drops Weekly',
+    subtext: 'Curated street apparel & limited run art scrolls.',
+    cta_text: 'View Arrivals',
+    cta_link: '/?category=clothing',
+    image_url: '',
+    updated_at: new Date().toISOString()
+  },
+  collector_spotlight: {
+    section: 'collector_spotlight',
+    eyebrow_tag: 'Collector Spotlight',
+    headline: 'Demon Slayer Nichirin Swords & Statues',
+    subtext: 'Official scale replica blades with zinc-alloy display stands.',
+    cta_text: 'Avail Offers',
+    cta_link: '/?category=accessories',
+    image_url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&auto=format&fit=crop&q=80',
+    updated_at: new Date().toISOString()
+  },
+  style_editorial: {
+    section: 'style_editorial',
+    eyebrow_tag: 'Style Editorial',
+    headline: 'Bring Bold Fashion → Your Anime, Your Style',
+    subtext: 'Heavyweight cotton hoodies, woven tapestry jackets, and Akatsuki cloaks crafted for fans who wear their passion boldly.',
+    cta_text: 'Shop Apparel Collection',
+    cta_link: '/?category=clothing',
+    image_url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&auto=format&fit=crop&q=80',
+    updated_at: new Date().toISOString()
+  }
+}
+
+const INITIAL_DEMO_ORDERS = []
+
+export function AppProvider({ children }) {
+  const [products, setProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PRODUCTS_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Filter out legacy placeholder products (prod-001 through prod-008)
+        const cleaned = parsed.filter((p) => !p.id?.startsWith('prod-00'))
+        if (cleaned && cleaned.length > 0) {
+          return cleaned
+        }
+      }
+      return INITIAL_PRODUCTS
+    } catch {
+      return INITIAL_PRODUCTS
+    }
+  })
+
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ORDERS_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Filter out legacy demo orders
+        const cleaned = parsed.filter((o) => o.id !== 'ord-9042' && o.id !== 'ord-8711')
+        return cleaned
+      }
+      return INITIAL_DEMO_ORDERS
+    } catch {
+      return INITIAL_DEMO_ORDERS
+    }
+  })
+
+  const [buyerProfiles, setBuyerProfiles] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PROFILES_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        delete parsed.user_demo_buyer
+        return parsed
+      }
+      return {}
+    } catch {
+      return {}
+    }
+  })
+
+  // Homepage promotional banners state
+  const [banners, setBanners] = useState(() => {
+    try {
+      const saved = localStorage.getItem(BANNERS_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return { ...INITIAL_BANNERS, ...parsed }
+      }
+      return INITIAL_BANNERS
+    } catch {
+      return INITIAL_BANNERS
+    }
+  })
+
+  // User state - defaults to guest visitor
+  const [mockUser, setMockUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem(MOCK_USER_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (parsed.id !== 'user_demo_buyer') return parsed
+      }
+    } catch {}
+    return {
+      id: null,
+      fullName: 'Guest Visitor',
+      role: 'guest'
+    }
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MOCK_USER_STORAGE_KEY, JSON.stringify(mockUser))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [mockUser])
+
+  // Sync to local storage
+  useEffect(() => {
+    try {
+      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [products])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [orders])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(buyerProfiles))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [buyerProfiles])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(BANNERS_STORAGE_KEY, JSON.stringify(banners))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [banners])
+
+  // Dedicated function to fetch/refresh homepage banners from Supabase
+  const refreshBanners = async () => {
+    if (!isSupabaseConfigured || !supabase) return
+
+    try {
+      const { data: remoteBanners, error: banErr } = await supabase
+        .from('homepage_banners')
+        .select('*')
+
+      if (!banErr && remoteBanners && remoteBanners.length > 0) {
+        const remoteMap = {}
+        remoteBanners.forEach(b => {
+          if (b.section) {
+            remoteMap[b.section] = b
+          }
+        })
+        setBanners(prev => ({ ...prev, ...remoteMap }))
+      } else if (banErr) {
+        console.warn('Homepage banners fetch notice:', banErr.message)
+      }
+    } catch (err) {
+      console.warn('Failed to refresh banners from Supabase:', err)
+    }
+  }
+
+  // Dedicated function to fetch/refresh orders from Supabase
+  const refreshOrders = async () => {
+    if (!isSupabaseConfigured || !supabase) return
+
+    try {
+      const { data: remoteOrders, error: ordErr } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (!ordErr && remoteOrders) {
+        setOrders(prev => {
+          const remoteIds = new Set(remoteOrders.map(o => o.id))
+          const localOnly = prev.filter(o => !remoteIds.has(o.id))
+          return [...remoteOrders, ...localOnly]
+        })
+      } else if (ordErr) {
+        console.warn('Orders fetch warning:', ordErr.message)
+      }
+    } catch (err) {
+      console.warn('Failed to refresh orders from Supabase:', err)
+    }
+  }
+
+  // Load from Supabase if configured
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return
+
+    async function loadSupabaseData() {
+      setIsLoading(true)
+      try {
+        const { data: remoteProducts, error: prodErr } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (!prodErr && remoteProducts && remoteProducts.length > 0) {
+          setProducts(remoteProducts)
+        }
+
+        await refreshOrders()
+        await refreshBanners()
+      } catch (err) {
+        console.warn('Supabase fetch failed, falling back to local store', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSupabaseData()
+  }, [])
+
+  // Helper to demote conflicting products when assigning single-slot or max-slot sections
+  const resolvePlacements = async (currentProducts, targetId, newSection) => {
+    if (!newSection || newSection === 'grid') return currentProducts
+
+    let updatedList = [...currentProducts]
+
+    if (newSection === 'hero' || newSection === 'spotlight') {
+      // Single-slot: demote any other product in this slot to grid
+      const conflicting = updatedList.find(p => p.id !== targetId && p.display_section === newSection)
+      if (conflicting) {
+        updatedList = updatedList.map(p => 
+          p.id === conflicting.id ? { ...p, display_section: 'grid' } : p
+        )
+        if (isSupabaseConfigured && supabase) {
+          try {
+            await supabase.from('products').update({ display_section: 'grid' }).eq('id', conflicting.id)
+          } catch (e) {
+            // Ignored if column doesn't exist yet
+          }
+        }
+      }
+    } else if (newSection === 'favourites') {
+      // Favourites allows up to 2 products. If 2 already exist, demote the oldest/lowest-priority to grid
+      const existingFavs = updatedList.filter(p => p.id !== targetId && p.display_section === 'favourites')
+      if (existingFavs.length >= 2) {
+        // Sort by sort_order descending so the highest sort_order gets demoted
+        const sortedFavs = [...existingFavs].sort((a, b) => (b.sort_order || 0) - (a.sort_order || 0))
+        const toDemote = sortedFavs[0]
+        updatedList = updatedList.map(p => 
+          p.id === toDemote.id ? { ...p, display_section: 'grid' } : p
+        )
+        if (isSupabaseConfigured && supabase) {
+          try {
+            await supabase.from('products').update({ display_section: 'grid' }).eq('id', toDemote.id)
+          } catch (e) {
+            // Ignored if column doesn't exist yet
+          }
+        }
+      }
+    }
+
+    return updatedList
+  }
+
+  // Product Operations
+  const addProduct = async (productData) => {
+    const section = productData.display_section || 'grid'
+    const sortOrder = parseInt(productData.sort_order) || 0
+
+    const newProduct = {
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'prod-' + Date.now(),
+      created_at: new Date().toISOString(),
+      in_stock: true,
+      stock: parseInt(productData.stock) || 0,
+      price: parseFloat(productData.price) || 0,
+      display_section: section,
+      sort_order: sortOrder,
+      ...productData,
+    }
+
+    // Resolve any placement collisions first
+    const resolvedList = await resolvePlacements(products, newProduct.id, section)
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('products').insert([newProduct]).select()
+        if (!error && data && data[0]) {
+          setProducts([data[0], ...resolvedList])
+          return data[0]
+        } else if (error && error.code === 'PGRST204') {
+          // If display_section/sort_order column does not exist yet on Supabase, insert without them
+          const { display_section, sort_order, ...fallbackProduct } = newProduct
+          const { data: fbData } = await supabase.from('products').insert([fallbackProduct]).select()
+          const returned = fbData?.[0] ? { ...fbData[0], display_section: section, sort_order: sortOrder } : newProduct
+          setProducts([returned, ...resolvedList])
+          return returned
+        }
+      } catch (err) {
+        console.error('Supabase product insert error:', err)
+      }
+    }
+
+    setProducts([newProduct, ...resolvedList])
+    return newProduct
+  }
+
+  const updateProduct = async (id, updates) => {
+    const sanitized = {
+      ...updates,
+      price: updates.price !== undefined ? parseFloat(updates.price) : undefined,
+      stock: updates.stock !== undefined ? parseInt(updates.stock) : undefined,
+      sort_order: updates.sort_order !== undefined ? parseInt(updates.sort_order) || 0 : undefined,
+    }
+
+    let currentList = products
+    if (sanitized.display_section) {
+      currentList = await resolvePlacements(products, id, sanitized.display_section)
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase.from('products').update(sanitized).eq('id', id)
+        if (error && error.code === 'PGRST204') {
+          // Fallback if schema does not have display_section or sort_order yet
+          const { display_section, sort_order, ...fallbackUpdates } = sanitized
+          if (Object.keys(fallbackUpdates).length > 0) {
+            await supabase.from('products').update(fallbackUpdates).eq('id', id)
+          }
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    setProducts(
+      currentList.map(p => (p.id === id ? { ...p, ...sanitized } : p))
+    )
+  }
+
+  const toggleSoldOut = async (id) => {
+    const product = products.find(p => p.id === id)
+    if (!product) return
+
+    const newInStock = !product.in_stock
+    const updates = {
+      in_stock: newInStock,
+      stock: newInStock ? Math.max(product.stock, 5) : 0
+    }
+
+    await updateProduct(id, updates)
+  }
+
+  const deleteProduct = async (id) => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('products').delete().eq('id', id)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    setProducts(prev => prev.filter(p => p.id !== id))
+  }
+
+  // Order Operations
+  const createOrder = async (orderData) => {
+    const newOrderId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'ord-' + Math.floor(1000 + Math.random() * 9000)
+    const newOrder = {
+      id: newOrderId,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      ...orderData,
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        // Direct insert without .select() to prevent PostgreSQL RETURNING * RLS SELECT evaluation
+        // that rolls back guest checkouts when SELECT is restricted under RLS
+        const { error } = await supabase.from('orders').insert([newOrder])
+        if (error) {
+          console.error('Supabase order insert error:', error)
+          throw new Error(error.message || 'Database error recording order')
+        }
+      } catch (err) {
+        console.error('Supabase order insert error:', err)
+        throw err
+      }
+    }
+
+    setOrders(prev => [newOrder, ...prev])
+
+    // If order has a user_id, upsert their buyer profile details
+    if (newOrder.user_id) {
+      saveBuyerProfile(newOrder.user_id, {
+        phone: newOrder.buyer_phone,
+        whatsapp: newOrder.buyer_whatsapp,
+        address: newOrder.buyer_address,
+      })
+    }
+
+    return newOrder
+  }
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    setOrders(prev =>
+      prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o))
+    )
+  }
+
+  // Buyer Profile Operations
+  const getBuyerProfile = (userId) => {
+    return buyerProfiles[userId] || null
+  }
+
+  const saveBuyerProfile = async (userId, data) => {
+    const updated = {
+      user_id: userId,
+      ...data,
+      updated_at: new Date().toISOString()
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('buyer_profiles').upsert([updated])
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    setBuyerProfiles(prev => ({
+      ...prev,
+      [userId]: updated
+    }))
+  }
+
+  // Homepage Banner Operations
+  const updateBanner = async (section, data) => {
+    const updated = {
+      ...(banners[section] || INITIAL_BANNERS[section] || {}),
+      ...data,
+      section,
+      updated_at: new Date().toISOString()
+    }
+
+    setBanners(prev => ({
+      ...prev,
+      [section]: updated
+    }))
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { error } = await supabase
+          .from('homepage_banners')
+          .upsert({
+            section,
+            eyebrow_tag: updated.eyebrow_tag || '',
+            headline: updated.headline || '',
+            subtext: updated.subtext || '',
+            cta_text: updated.cta_text || '',
+            cta_link: updated.cta_link || '',
+            image_url: updated.image_url || '',
+            updated_at: updated.updated_at
+          }, { onConflict: 'section' })
+
+        if (error) {
+          console.warn('Supabase banner upsert notice:', error.message)
+        }
+      } catch (err) {
+        console.warn('Failed to upsert banner to Supabase:', err)
+      }
+    }
+
+    return updated
+  }
+
+  const resetBanner = async (section) => {
+    if (!INITIAL_BANNERS[section]) return
+    return await updateBanner(section, INITIAL_BANNERS[section])
+  }
+
+  const resetCatalog = () => {
+    setProducts(INITIAL_PRODUCTS)
+    try {
+      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS))
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  return (
+    <AppContext.Provider
+      value={{
+        products,
+        orders,
+        banners,
+        isLoading,
+        mockUser,
+        setMockUser,
+        isLiveBackend: isSupabaseConfigured && isClerkConfigured,
+        addProduct,
+        updateProduct,
+        toggleSoldOut,
+        deleteProduct,
+        resetCatalog,
+        createOrder,
+        updateOrderStatus,
+        refreshOrders,
+        getBuyerProfile,
+        saveBuyerProfile,
+        updateBanner,
+        resetBanner,
+        refreshBanners,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  )
+}
+
+export function useApp() {
+  const context = useContext(AppContext)
+  if (!context) {
+    throw new Error('useApp must be used within an AppProvider')
+  }
+  return context
+}
