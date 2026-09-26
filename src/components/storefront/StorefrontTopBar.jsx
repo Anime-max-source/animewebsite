@@ -141,10 +141,14 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
               className="flex items-center gap-2 p-1 sm:pr-3 rounded-full hover:bg-gray-100 transition-colors"
               title="Account settings"
             >
-              <div className="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-bold">
-                {mockUser.fullName?.charAt(0) || 'U'}
+              <div className="w-8 h-8 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-bold overflow-hidden border border-black/10">
+                {mockUser.imageUrl ? (
+                  <img src={mockUser.imageUrl} alt={mockUser.fullName || 'User'} className="w-full h-full object-cover" />
+                ) : (
+                  mockUser.fullName?.charAt(0) || 'U'
+                )}
               </div>
-              <span className="hidden sm:inline text-xs font-bold text-[#111111] max-w-[100px] truncate">
+              <span className="hidden sm:inline text-xs font-bold text-[#111111] max-w-[120px] truncate">
                 {mockUser.fullName}
               </span>
             </Link>

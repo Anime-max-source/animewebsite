@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SignUp as ClerkSignUp } from '@clerk/clerk-react'
 import { isClerkConfigured } from '../../lib/clerkClient'
@@ -7,14 +7,21 @@ import { Flame, UserPlus } from 'lucide-react'
 
 export default function SignUp() {
   const navigate = useNavigate()
-  const { setMockUser } = useApp()
+  const { mockUser, setMockUser } = useApp()
+
+  useEffect(() => {
+    if (mockUser && mockUser.role !== 'guest') {
+      navigate('/account', { replace: true })
+    }
+  }, [mockUser, navigate])
 
   const handleDemoSignUp = () => {
     setMockUser({
       id: 'user_' + Date.now().toString().slice(-6),
       fullName: 'New Member',
       primaryEmailAddress: { emailAddress: 'newbuyer@animemax.store' },
-      role: 'buyer'
+      role: 'buyer',
+      authSource: 'demo'
     })
     navigate('/account')
   }
@@ -32,8 +39,19 @@ export default function SignUp() {
       </div>
 
       {isClerkConfigured ? (
-        <div className="flex justify-center">
-          <ClerkSignUp routing="path" path="/signup" signInUrl="/signin" fallbackRedirectUrl="/account" />
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <ClerkSignUp routing="path" path="/signup" signInUrl="/signin" fallbackRedirectUrl="/account" />
+          </div>
+
+          <div className="text-center pt-2">
+            <button
+              onClick={handleDemoSignUp}
+              className="text-xs text-[#8A8A8A] hover:text-[#111111] underline transition-colors"
+            >
+              Continue with One-Click Demo Member
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bg-white p-6 sm:p-8 rounded-2xl border border-black/5 shadow-sm space-y-4">
@@ -56,3 +74,4 @@ export default function SignUp() {
     </div>
   )
 }
+

@@ -5,10 +5,33 @@ import { isClerkConfigured } from '../lib/clerkClient'
 import { useUser } from '@clerk/clerk-react'
 
 function ClerkProtectedBuyer({ children }) {
-  const { isSignedIn, isLoaded } = useUser()
+  const { isSignedIn, isLoaded, user } = useUser()
+  const { mockUser, setMockUser } = useApp()
+
+  React.useEffect(() => {
+    if (isLoaded && isSignedIn && user) {
+      if (!mockUser || mockUser.id !== user.id) {
+        const clerkEmail = user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress || ''
+        const clerkName = user.fullName || user.firstName || (clerkEmail ? clerkEmail.split('@')[0] : 'Valued Buyer')
+        setMockUser({
+          id: user.id,
+          fullName: clerkName,
+          primaryEmailAddress: { emailAddress: clerkEmail },
+          imageUrl: user.imageUrl || '',
+          role: 'buyer',
+          authSource: 'clerk'
+        })
+      }
+    }
+  }, [isLoaded, isSignedIn, user, mockUser?.id])
 
   if (!isLoaded) {
-    return <div className="p-8 text-center text-xs text-slate-400">Verifying session...</div>
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center space-y-3">
+        <div className="w-7 h-7 border-2 border-[#111111] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-[#6B6B6B] font-medium">Verifying your session...</p>
+      </div>
+    )
   }
 
   if (!isSignedIn) {

@@ -116,15 +116,7 @@ export default function Navbar() {
           {/* Right Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
             
-            {/* Admin Portal Link */}
-            <Link
-              to="/admin"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/90 hover:bg-purple-950/50 text-purple-300 border border-purple-800/40 hover:border-purple-600 transition-all shadow-sm"
-              title="Store Owner Admin Panel"
-            >
-              <Shield className="w-3.5 h-3.5 text-purple-400" />
-              <span>Admin</span>
-            </Link>
+
 
             {/* Buyer Account / Login Menu */}
             <div className="relative">
@@ -175,12 +167,7 @@ export default function Navbar() {
                     </>
                   )}
 
-                  <Link
-                    to="/admin"
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-purple-300 hover:bg-purple-950/40 transition-colors border-t border-slate-800 mt-1"
-                  >
-                    <Shield className="w-4 h-4 text-purple-400" /> Admin Dashboard
-                  </Link>
+
                 </div>
               )}
             </div>
@@ -245,13 +232,7 @@ export default function Navbar() {
               >
                 <Package className="w-4 h-4" /> Order History
               </Link>
-              <Link
-                to="/admin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-xs text-purple-400 font-semibold flex items-center gap-1.5 py-1"
-              >
-                <Shield className="w-4 h-4" /> Admin Panel
-              </Link>
+
             </div>
           </div>
         )}

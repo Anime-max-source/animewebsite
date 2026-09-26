@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
 import { INITIAL_PRODUCTS } from '../utils/seedData'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { isClerkConfigured, OWNER_CLERK_ID, isOwnerUser } from '../lib/clerkClient'
@@ -132,6 +132,31 @@ export function AppProvider({ children }) {
       role: 'guest'
     }
   })
+
+  const logoutHandlerRef = useRef(null)
+
+  const registerLogoutHandler = useCallback((handler) => {
+    logoutHandlerRef.current = handler
+  }, [])
+
+  const logout = useCallback(async () => {
+    if (logoutHandlerRef.current) {
+      try {
+        await logoutHandlerRef.current()
+      } catch (err) {
+        console.warn('Error during auth provider logout:', err)
+      }
+    }
+    setMockUser({
+      id: null,
+      fullName: 'Guest Visitor',
+      role: 'guest',
+      authSource: null
+    })
+    try {
+      localStorage.removeItem(MOCK_USER_STORAGE_KEY)
+    } catch {}
+  }, [])
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -539,6 +564,8 @@ export function AppProvider({ children }) {
         isLoading,
         mockUser,
         setMockUser,
+        logout,
+        registerLogoutHandler,
         isLiveBackend: isSupabaseConfigured && isClerkConfigured,
         addProduct,
         updateProduct,

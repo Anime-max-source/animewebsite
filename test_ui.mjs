@@ -153,9 +153,9 @@ async function runTests() {
       await page.goto('http://localhost:5173/admin', { waitUntil: 'networkidle' })
     }
 
-    await page.locator('h1:has-text("Shop Overview")').waitFor({ state: 'visible', timeout: 5000 })
+    await page.locator('h1:has-text("Dashboard"), h1:has-text("Shop Overview")').first().waitFor({ state: 'visible', timeout: 5000 })
     const adminHeading = await page.locator('h1').first().textContent()
-    console.log(`✓ Admin Header: "${adminHeading}" (Dark sidebar + light canvas intact)`)
+    console.log(`✓ Admin Header: "${adminHeading}" (Light theme SaaS Admin Panel intact)`)
 
   } catch (err) {
     errors.push(`[Test Execution Error] ${err.message}`)

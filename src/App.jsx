@@ -4,7 +4,7 @@ import CartDrawer from './components/storefront/CartDrawer'
 import StorefrontSidebar from './components/storefront/StorefrontSidebar'
 import StorefrontTopBar from './components/storefront/StorefrontTopBar'
 import StorefrontFooter from './components/storefront/StorefrontFooter'
-import AdminSidebar from './components/admin/AdminSidebar'
+import AdminLayout from './components/admin/AdminLayout'
 
 // Storefront Pages
 import Home from './pages/storefront/Home'
@@ -27,6 +27,7 @@ import ManageOrders from './pages/admin/ManageOrders'
 import ManageBanners from './pages/admin/ManageBanners'
 import Customers from './pages/admin/Customers'
 import Messages from './pages/admin/Messages'
+import AdminSettings from './pages/admin/AdminSettings'
 
 // Route Guards
 import ProtectedBuyerRoute from './routes/ProtectedBuyerRoute'
@@ -39,26 +40,24 @@ export default function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   return (
-    <div className={`min-h-screen flex flex-col ${isAdminPath ? 'bg-[#F5F5F3] text-[#111111]' : 'bg-[#E3EFE1] text-[#111111]'}`}>
+    <div className={`min-h-screen flex flex-col ${isAdminPath ? 'bg-[#F5F6F8] text-[#111827]' : 'bg-[#E3EFE1] text-[#111111]'}`}>
       {/* Global Slide-out Shopping Cart Drawer */}
       <CartDrawer />
 
       {isAdminPath ? (
-        /* Admin Layout: Dark Sidebar + Light Off-White Content Area (#F5F5F3) */
-        <div className="flex min-h-screen bg-[#F5F5F3]">
-          <AdminSidebar />
-          <main className="flex-1 p-6 lg:p-8 overflow-y-auto bg-[#F5F5F3] text-[#111111]">
-            <Routes>
-              <Route path="/admin" element={<ProtectedAdminRoute><Dashboard /></ProtectedAdminRoute>} />
-              <Route path="/admin/products" element={<ProtectedAdminRoute><ManageProducts /></ProtectedAdminRoute>} />
-              <Route path="/admin/orders" element={<ProtectedAdminRoute><ManageOrders /></ProtectedAdminRoute>} />
-              <Route path="/admin/content" element={<ProtectedAdminRoute><ManageBanners /></ProtectedAdminRoute>} />
-              <Route path="/admin/customers" element={<ProtectedAdminRoute><Customers /></ProtectedAdminRoute>} />
-              <Route path="/admin/messages" element={<ProtectedAdminRoute><Messages /></ProtectedAdminRoute>} />
-              <Route path="/admin/login/*" element={<AdminLogin />} />
-            </Routes>
-          </main>
-        </div>
+        /* Admin Layout: Light SaaS Theme (#FFFFFF Sidebar, #F5F6F8 Canvas, #EDEDED Borders) */
+        <AdminLayout>
+          <Routes>
+            <Route path="/admin" element={<ProtectedAdminRoute><Dashboard /></ProtectedAdminRoute>} />
+            <Route path="/admin/products" element={<ProtectedAdminRoute><ManageProducts /></ProtectedAdminRoute>} />
+            <Route path="/admin/orders" element={<ProtectedAdminRoute><ManageOrders /></ProtectedAdminRoute>} />
+            <Route path="/admin/content" element={<ProtectedAdminRoute><ManageBanners /></ProtectedAdminRoute>} />
+            <Route path="/admin/customers" element={<ProtectedAdminRoute><Customers /></ProtectedAdminRoute>} />
+            <Route path="/admin/settings" element={<ProtectedAdminRoute><AdminSettings /></ProtectedAdminRoute>} />
+            <Route path="/admin/messages" element={<ProtectedAdminRoute><Messages /></ProtectedAdminRoute>} />
+            <Route path="/admin/login/*" element={<AdminLogin />} />
+          </Routes>
+        </AdminLayout>
       ) : (
         /* Storefront Layout: Pastel-Green Canvas (#E3EFE1) + Floating Rounded Cards */
         <div className="min-h-screen p-3 sm:p-5 lg:p-6 flex gap-6 max-w-[1700px] w-full mx-auto">

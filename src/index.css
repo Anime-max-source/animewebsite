@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-sidebar: #FFFFFF;
+  --bg-content: #F5F6F8;
+  --card-bg: #FFFFFF;
+  --border-subtle: #EDEDED;
+  --accent-blue: #3B82F6;
+  --accent-green: #16A34A;
+  --accent-red: #DC2626;
+  --accent-orange: #F59E0B;
+  --text-primary: #111827;
+  --text-muted: #6B7280;
+}
+
 @layer base {
   body {
     background-color: #E3EFE1;

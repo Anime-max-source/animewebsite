@@ -20,7 +20,7 @@ import { useApp } from '../../context/AppContext'
 import { formatPrice } from '../../utils/formatPrice'
 
 export default function StorefrontSidebar() {
-  const { mockUser, setMockUser, orders, products } = useApp()
+  const { mockUser, setMockUser, logout, orders, products } = useApp()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -236,8 +236,12 @@ export default function StorefrontSidebar() {
             {isBuyerSignedIn ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-[#111111] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                    {mockUser.fullName?.charAt(0) || 'U'}
+                  <div className="w-8 h-8 rounded-full bg-[#111111] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 overflow-hidden border border-black/10">
+                    {mockUser.imageUrl ? (
+                      <img src={mockUser.imageUrl} alt={mockUser.fullName || 'User'} className="w-full h-full object-cover" />
+                    ) : (
+                      mockUser.fullName?.charAt(0) || 'U'
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-[#111111] truncate">{mockUser.fullName}</p>
@@ -246,8 +250,8 @@ export default function StorefrontSidebar() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setMockUser({ id: null, fullName: 'Guest Visitor', role: 'guest' })
+                  onClick={async () => {
+                    await logout()
                     showToast('Logged out of buyer account')
                   }}
                   className="p-2 rounded-xl text-[#6B6B6B] hover:text-[#111111] hover:bg-black/5 transition-colors"

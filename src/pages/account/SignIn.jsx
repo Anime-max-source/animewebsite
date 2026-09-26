@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SignIn as ClerkSignIn } from '@clerk/clerk-react'
 import { isClerkConfigured } from '../../lib/clerkClient'
@@ -7,7 +7,14 @@ import { Flame, ShieldCheck, ArrowRight, User } from 'lucide-react'
 
 export default function SignIn() {
   const navigate = useNavigate()
-  const { setMockUser } = useApp()
+  const { mockUser, setMockUser } = useApp()
+
+  // If already signed in, immediately redirect to account (or admin if owner)
+  useEffect(() => {
+    if (mockUser && mockUser.role !== 'guest') {
+      navigate('/account', { replace: true })
+    }
+  }, [mockUser, navigate])
 
   const handleDemoSignIn = (role) => {
     if (role === 'buyer') {
@@ -15,17 +22,10 @@ export default function SignIn() {
         id: 'user_' + Date.now().toString().slice(-6),
         fullName: 'Registered Buyer',
         primaryEmailAddress: { emailAddress: 'buyer@animemax.store' },
-        role: 'buyer'
+        role: 'buyer',
+        authSource: 'demo'
       })
       navigate('/account')
-    } else if (role === 'owner') {
-      setMockUser({
-        id: 'user_owner_animemax',
-        fullName: 'Owner Admin',
-        primaryEmailAddress: { emailAddress: 'admin@animemax.store' },
-        role: 'owner'
-      })
-      navigate('/admin')
     }
   }
 
@@ -43,8 +43,19 @@ export default function SignIn() {
 
       {/* If Clerk is live configured, render Clerk's native SignIn */}
       {isClerkConfigured ? (
-        <div className="flex justify-center">
-          <ClerkSignIn routing="path" path="/signin" signUpUrl="/signup" fallbackRedirectUrl="/account" />
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <ClerkSignIn routing="path" path="/signin" signUpUrl="/signup" fallbackRedirectUrl="/account" />
+          </div>
+
+          <div className="text-center pt-2">
+            <button
+              onClick={() => handleDemoSignIn('buyer')}
+              className="text-xs text-[#8A8A8A] hover:text-[#111111] underline transition-colors"
+            >
+              Continue with One-Click Demo Buyer
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bg-white p-6 sm:p-8 rounded-2xl border border-black/5 shadow-sm space-y-4">
@@ -54,14 +65,6 @@ export default function SignIn() {
           >
             <User className="w-4 h-4" />
             <span>Sign In as Buyer</span>
-          </button>
-
-          <button
-            onClick={() => handleDemoSignIn('owner')}
-            className="w-full py-3 px-4 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-          >
-            <ShieldCheck className="w-4 h-4 text-purple-600" />
-            <span>Sign In as Store Owner (Admin)</span>
           </button>
 
           <div className="pt-2 text-center text-xs text-[#6B6B6B]">
@@ -75,3 +78,4 @@ export default function SignIn() {
     </div>
   )
 }
+

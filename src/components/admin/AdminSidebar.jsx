@@ -5,32 +5,32 @@ import {
   Package, 
   ShoppingBag, 
   Users, 
-  MessageSquare, 
-  ChevronDown, 
-  Flame, 
-  ExternalLink, 
   Sparkles,
-  ArrowRight
+  ExternalLink, 
+  Settings,
+  HelpCircle,
+  ChevronLeft,
+  Menu
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ 
+  isCollapsed = false, 
+  onToggleCollapse, 
+  onOpenHelp,
+  onMobileClose 
+}) {
   const location = useLocation()
-  const { orders, mockUser } = useApp()
+  const { orders } = useApp()
 
   const pendingCount = orders.filter((o) => o.status === 'pending').length
 
-  const menuItems = [
+  const primaryNavItems = [
     {
       name: 'Dashboard',
       path: '/admin',
       icon: LayoutDashboard,
       exact: true
-    },
-    {
-      name: 'Products',
-      path: '/admin/products',
-      icon: Package,
     },
     {
       name: 'Orders',
@@ -39,9 +39,9 @@ export default function AdminSidebar() {
       badge: pendingCount > 0 ? pendingCount : null
     },
     {
-      name: 'Homepage Content',
-      path: '/admin/content',
-      icon: Sparkles,
+      name: 'Products',
+      path: '/admin/products',
+      icon: Package,
     },
     {
       name: 'Customers',
@@ -49,123 +49,187 @@ export default function AdminSidebar() {
       icon: Users,
     },
     {
-      name: 'Messages / Support',
-      path: '/admin/messages',
-      icon: MessageSquare,
+      name: 'Homepage Content',
+      path: '/admin/content',
+      icon: Sparkles,
+    },
+    {
+      name: 'Online Store',
+      path: '/',
+      icon: ExternalLink,
+      isExternal: true
     },
   ]
 
+  const secondaryNavItems = [
+    {
+      name: 'Settings',
+      path: '/admin/settings',
+      icon: Settings,
+    },
+    {
+      name: 'Help & Support',
+      action: 'help',
+      icon: HelpCircle,
+    }
+  ]
+
   const isActive = (item) => {
+    if (item.isExternal || item.action) return false
     if (item.exact) return location.pathname === item.path
     return location.pathname.startsWith(item.path)
   }
 
+  const handleLinkClick = () => {
+    if (onMobileClose) {
+      onMobileClose()
+    }
+  }
+
   return (
-    <aside className="w-64 bg-[#0B0B0B] border-r border-[#1C1C1C] flex flex-col justify-between p-4 min-h-screen shrink-0 text-white font-sans select-none">
-      <div className="space-y-6">
-        
-        {/* Logo / Wordmark */}
-        <div className="flex items-center gap-2.5 px-3 pt-2">
-          <div className="w-8 h-8 rounded-xl bg-[#D6FF4A] flex items-center justify-center text-black shadow-sm">
-            <Flame className="w-5 h-5 fill-black text-black" />
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="font-extrabold text-base tracking-tight text-white font-display">
-              Anime<span className="text-[#D6FF4A]">Max</span>
-            </span>
-            <span className="text-[10px] font-semibold text-[#8A8A8A] uppercase tracking-wider ml-1">
-              Admin
-            </span>
-          </div>
-        </div>
-
-        {/* Owner Profile Block */}
-        <div className="mx-1 px-3 py-2.5 rounded-2xl bg-[#141414] border border-[#222222] flex items-center justify-between hover:border-[#333333] transition-colors cursor-pointer group">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D6FF4A] to-[#B8A4FF] p-[1.5px] shrink-0">
-              <div className="w-full h-full rounded-full bg-[#0B0B0B] flex items-center justify-center text-xs font-bold text-white">
-                {mockUser?.fullName?.charAt(0) || 'O'}
+    <aside 
+      className={`bg-white border-r border-[#EDEDED] flex flex-col justify-between shrink-0 font-sans select-none transition-all duration-200 z-30 ${
+        isCollapsed ? 'w-20' : 'w-64'
+      } h-screen sticky top-0`}
+    >
+      <div className="flex flex-col h-full">
+        {/* Top: Logo / Wordmark + Collapse Button */}
+        <div className="h-16 px-4 flex items-center justify-between border-b border-[#EDEDED] shrink-0">
+          <Link 
+            to="/admin" 
+            onClick={handleLinkClick}
+            className="flex items-center gap-2 overflow-hidden group"
+          >
+            {isCollapsed ? (
+              <span className="font-bold text-sm tracking-tight text-[#111827]">
+                A<span className="text-[#3B82F6]">M</span>
+              </span>
+            ) : (
+              <div className="flex items-baseline gap-1.5 min-w-0">
+                <span className="font-bold text-base tracking-tight text-[#111827]">
+                  Anime<span className="text-[#3B82F6]">Max</span>
+                </span>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider bg-gray-100 px-1.5 py-0.5 rounded">
+                  Admin
+                </span>
               </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-white truncate group-hover:text-[#D6FF4A] transition-colors">
-                {mockUser?.fullName || 'Store Owner'}
-              </p>
-              <p className="text-[10px] text-[#8A8A8A] truncate">
-                {mockUser?.primaryEmailAddress?.emailAddress || 'owner@animemax.store'}
-              </p>
-            </div>
-          </div>
-          <ChevronDown className="w-3.5 h-3.5 text-[#8A8A8A] shrink-0 group-hover:text-white transition-colors" />
+            )}
+          </Link>
+
+          {/* Small Collapse Icon Button */}
+          {onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              className="p-1.5 rounded-lg text-[#6B7280] hover:text-[#111827] hover:bg-gray-100 transition-colors hidden md:flex items-center justify-center"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <ChevronLeft className={`w-4 h-4 transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`} />
+            </button>
+          )}
         </div>
 
-        {/* Navigation List */}
-        <nav className="space-y-1">
-          {menuItems.map((item) => {
+        {/* Primary Navigation */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+          {primaryNavItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item)
+
+            if (item.isExternal) {
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={handleLinkClick}
+                  title={isCollapsed ? item.name : undefined}
+                  className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between px-3'} py-2 rounded-xl text-xs font-medium text-[#6B7280] hover:text-[#111827] hover:bg-gray-50 transition-colors group`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Icon className="w-4 h-4 text-[#6B7280] group-hover:text-[#111827] shrink-0" />
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
+                  </div>
+                  {!isCollapsed && (
+                    <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
+                  )}
+                </Link>
+              )
+            }
+
             return (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                onClick={handleLinkClick}
+                title={isCollapsed ? item.name : undefined}
+                className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between px-3'} py-2.5 rounded-xl text-xs font-medium transition-all ${
                   active
-                    ? 'bg-white text-black rounded-full shadow-md'
-                    : 'text-[#8A8A8A] hover:text-white hover:bg-white/5 rounded-xl'
+                    ? 'bg-[#EFF6FF] text-[#3B82F6] font-semibold'
+                    : 'text-[#4B5563] hover:text-[#111827] hover:bg-gray-50'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${active ? 'text-black' : 'text-[#8A8A8A]'}`} />
-                  <span>{item.name}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-[#3B82F6]' : 'text-[#6B7280]'}`} />
+                  {!isCollapsed && <span className="truncate">{item.name}</span>}
                 </div>
-                {item.badge !== null && item.badge !== undefined && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      active
-                        ? 'bg-black text-[#D6FF4A]'
-                        : 'bg-[#D6FF4A] text-black'
-                    }`}
-                  >
+                {!isCollapsed && item.badge !== null && item.badge !== undefined && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     {item.badge}
                   </span>
+                )}
+                {isCollapsed && item.badge !== null && item.badge !== undefined && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500" />
                 )}
               </Link>
             )
           })}
-        </nav>
-      </div>
-
-      {/* Bottom Promo/Upsell Card & Storefront link */}
-      <div className="space-y-3 pt-4">
-        
-        {/* Promo / Upsell Card */}
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-[#181818] via-[#141414] to-[#121212] border border-[#252525] relative overflow-hidden shadow-sm">
-          <div className="w-8 h-8 rounded-xl bg-[#D6FF4A]/10 border border-[#D6FF4A]/20 flex items-center justify-center text-[#D6FF4A] mb-3">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <h4 className="text-xs font-bold text-white tracking-tight">
-            Automate UPI Payments
-          </h4>
-          <p className="text-[11px] text-[#8A8A8A] mt-1 leading-snug">
-            Connect Razorpay or Cashfree to replace manual WhatsApp QR confirmation.
-          </p>
-          <Link
-            to="/admin/orders"
-            className="mt-3 w-full py-2 px-3 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] text-white text-[11px] font-semibold flex items-center justify-between transition-colors border border-[#333333]"
-          >
-            <span>Learn More</span>
-            <ArrowRight className="w-3 h-3 text-[#D6FF4A]" />
-          </Link>
         </div>
 
-        {/* Storefront Link */}
-        <Link
-          to="/"
-          className="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[#8A8A8A] hover:text-white hover:bg-white/5 transition-colors"
-        >
-          <span>View Public Storefront</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </Link>
+        {/* Divider Line */}
+        <div className="border-t border-[#EDEDED] my-2 mx-3" />
+
+        {/* Secondary / Footer Navigation */}
+        <div className="px-3 pb-4 pt-1 space-y-1 shrink-0">
+          {secondaryNavItems.map((item) => {
+            const Icon = item.icon
+
+            if (item.action === 'help') {
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => {
+                    if (onOpenHelp) onOpenHelp()
+                    handleLinkClick()
+                  }}
+                  title={isCollapsed ? item.name : undefined}
+                  className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'} py-2 rounded-xl text-xs font-normal text-[#6B7280] hover:text-[#111827] hover:bg-gray-50 transition-colors`}
+                >
+                  <Icon className="w-4 h-4 text-[#6B7280] shrink-0" />
+                  {!isCollapsed && <span>{item.name}</span>}
+                </button>
+              )
+            }
+
+            const active = location.pathname.startsWith(item.path)
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                onClick={handleLinkClick}
+                title={isCollapsed ? item.name : undefined}
+                className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'} py-2 rounded-xl text-xs font-normal transition-colors ${
+                  active 
+                    ? 'bg-[#EFF6FF] text-[#3B82F6] font-semibold' 
+                    : 'text-[#6B7280] hover:text-[#111827] hover:bg-gray-50'
+                }`}
+              >
+                <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-[#3B82F6]' : 'text-[#6B7280]'}`} />
+                {!isCollapsed && <span>{item.name}</span>}
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </aside>
   )

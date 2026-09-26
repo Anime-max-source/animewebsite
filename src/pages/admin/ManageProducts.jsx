@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Search, Filter, ArrowUpRight } from 'lucide-react'
+import { Plus, Search, Filter, RefreshCw } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import ProductTable from '../../components/admin/ProductTable'
 import ProductForm from '../../components/admin/ProductForm'
@@ -47,55 +47,57 @@ export default function ManageProducts() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto font-sans">
+    <div className="space-y-6 max-w-7xl mx-auto font-sans antialiased text-[#111827]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#111111] tracking-tight font-display">
-            Manage Products & Inventory
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#111827] tracking-tight">
+            Products & Inventory
           </h1>
-          <p className="text-xs text-[#8A8A8A] mt-1 font-medium">
-            Add new collectibles, edit pricing, or toggle items between in-stock and sold out.
+          <p className="text-xs text-[#6B7280] mt-0.5">
+            Add new collectibles, edit pricing, manage stock availability, and configure homepage placement.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
           <button
             onClick={() => resetCatalog()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#EDEDED] bg-white hover:bg-gray-50 text-xs font-semibold text-[#4B5563] shadow-2xs transition-all"
             title="Restore default catalog items"
           >
-            Restore Default Catalog
+            <RefreshCw className="w-3.5 h-3.5 text-[#6B7280]" />
+            <span>Reset Defaults</span>
           </button>
+          
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-xs font-bold shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
           >
-            <Plus className="w-4 h-4 text-[#D6FF4A]" />
+            <Plus className="w-4 h-4 text-white" />
             <span>Add New Product</span>
           </button>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3.5 rounded-xl border border-[#EDEDED] shadow-2xs">
         <div className="relative w-full sm:w-80">
           <input
             type="text"
             placeholder="Search by title, HW#, series, or color..."
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
-            className="w-full bg-[#F5F5F3] border border-slate-200 rounded-full pl-9 pr-4 py-2 text-xs text-[#111111] placeholder-[#8A8A8A] focus:outline-none focus:border-[#111111]"
+            className="w-full bg-[#F5F6F8] border border-[#EDEDED] rounded-xl pl-9 pr-4 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
           />
-          <Search className="w-3.5 h-3.5 text-[#8A8A8A] absolute left-3.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3.5 top-2.5" />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto self-end">
-          <span className="text-xs text-[#8A8A8A]">Series / Category:</span>
+          <span className="text-xs text-[#6B7280]">Filter:</span>
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-[#F5F5F3] border border-slate-200 text-xs text-[#111111] font-semibold rounded-full px-3.5 py-1.5 focus:outline-none focus:border-[#111111] cursor-pointer"
+            className="bg-[#F5F6F8] border border-[#EDEDED] text-xs text-[#111827] font-semibold rounded-xl px-3.5 py-1.5 focus:outline-none focus:border-[#3B82F6] cursor-pointer"
           >
             <option value="all">All Series / Categories ({products.length})</option>
             {distinctCategories.map((c) => (
@@ -117,7 +119,7 @@ export default function ManageProducts() {
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="Add New Anime Merchandise"
+        title="Add New Merchandise"
       >
         <ProductForm
           onSubmit={handleAddSubmit}

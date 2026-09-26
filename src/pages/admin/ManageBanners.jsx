@@ -176,26 +176,26 @@ export default function ManageBanners() {
       </div>
 
       {/* Sections Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {sectionsList.map((sec) => {
           const banner = banners[sec.id] || {}
           return (
             <div
               key={sec.id}
-              className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-4 hover:border-slate-300 transition-colors"
+              className="p-5 sm:p-6 rounded-xl bg-white border border-[#EDEDED] shadow-2xs flex flex-col justify-between space-y-4 hover:border-gray-300 transition-colors"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-slate-100 text-[#111111]">
+                  <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-[#F5F6F8] text-[#111827] border border-[#EDEDED]">
                     {sec.spec.label}
                   </span>
-                  <span className="text-[11px] text-[#8A8A8A] font-mono">
+                  <span className="text-[11px] text-[#6B7280] font-mono">
                     {sec.spec.aspectRatio}
                   </span>
                 </div>
 
                 {/* Preview Thumbnail Box */}
-                <div className={`relative rounded-xl overflow-hidden aspect-[16/9] border border-black/5 ${sec.themeBg} flex items-center justify-center`}>
+                <div className={`relative rounded-xl overflow-hidden aspect-[16/9] border border-[#EDEDED] ${sec.themeBg} flex items-center justify-center`}>
                   {banner.image_url ? (
                     <img
                       src={banner.image_url}
@@ -222,28 +222,28 @@ export default function ManageBanners() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-[#111111]">{sec.title}</h3>
-                  <p className="text-xs text-[#8A8A8A] leading-relaxed">{sec.description}</p>
+                  <h3 className="text-sm font-bold text-[#111827]">{sec.title}</h3>
+                  <p className="text-xs text-[#6B7280] leading-relaxed">{sec.description}</p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#F5F5F3] text-xs space-y-1">
-                  <div className="flex items-center justify-between text-[#8A8A8A]">
+                <div className="p-3 rounded-xl bg-[#F5F6F8] border border-[#EDEDED] text-xs space-y-1">
+                  <div className="flex items-center justify-between text-[#6B7280]">
                     <span>Button Text:</span>
-                    <span className="font-semibold text-[#111111]">{banner.cta_text || 'None'}</span>
+                    <span className="font-semibold text-[#111827]">{banner.cta_text || 'None'}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[#8A8A8A]">
+                  <div className="flex items-center justify-between text-[#6B7280]">
                     <span>Button Link:</span>
-                    <span className="font-mono text-[11px] text-[#111111] truncate max-w-[200px]">{banner.cta_link || 'None'}</span>
+                    <span className="font-mono text-[11px] text-[#111827] truncate max-w-[200px]">{banner.cta_link || 'None'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div className="pt-2 border-t border-[#EDEDED] flex items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => handleReset(sec.id)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-rose-600 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9CA3AF] hover:text-rose-600 transition-colors"
                   title="Revert back to original default"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -253,7 +253,7 @@ export default function ManageBanners() {
                 <button
                   type="button"
                   onClick={() => openEditor(sec.id)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111] hover:bg-black text-white text-xs font-bold shadow-sm transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
                 >
                   <Sliders className="w-3.5 h-3.5" />
                   <span>Edit Content</span>

@@ -135,20 +135,23 @@ create policy "Allow anyone to insert orders"
     to public, anon, authenticated
     with check (true);
 
--- Allow reading orders (storefront buyer & admin)
+-- Buyers can read their own orders; owner can read all
 create policy "Allow read access to orders"
     on public.orders
     for select
     to public, anon, authenticated
-    using (true);
+    using (
+        (auth.jwt() ->> 'sub') = user_id
+        OR public.is_owner()
+    );
 
--- Owner / Admin can update all orders (status updates)
+-- Only the owner can update order status
 create policy "Allow update access to orders"
     on public.orders
     for update
-    to public, anon, authenticated
-    using (true)
-    with check (true);
+    to authenticated
+    using (public.is_owner())
+    with check (public.is_owner());
 
 -- ---------------------------------------------------------
 -- 4. HOMEPAGE BANNERS TABLE & POLICIES
@@ -179,14 +182,14 @@ create policy "Allow public read access to homepage_banners"
     to public, anon, authenticated
     using (true);
 
--- Owner write access: Owner can insert or update banners
+-- Owner write access: Only owner can insert or update banners
 drop policy if exists "Allow owner write access to homepage_banners" on public.homepage_banners;
 create policy "Allow owner write access to homepage_banners"
     on public.homepage_banners
     for all
-    to public, anon, authenticated
-    using (true)
-    with check (true);
+    to authenticated
+    using (public.is_owner())
+    with check (public.is_owner());
 
 -- Seed initial rows if not present
 insert into public.homepage_banners (section, eyebrow_tag, headline, subtext, cta_text, cta_link, image_url)
@@ -213,11 +216,11 @@ create policy "Public Access to Homepage Banners"
 drop policy if exists "Allow upload to Homepage Banners" on storage.objects;
 create policy "Allow upload to Homepage Banners"
     on storage.objects for insert
-    to public, anon, authenticated
-    with check (bucket_id = 'homepage-banners');
+    to authenticated
+    with check (bucket_id = 'homepage-banners' AND public.is_owner());
 
 drop policy if exists "Allow update on Homepage Banners" on storage.objects;
 create policy "Allow update on Homepage Banners"
     on storage.objects for update
-    to public, anon, authenticated
-    using (bucket_id = 'homepage-banners');
+    to authenticated
+    using (bucket_id = 'homepage-banners' AND public.is_owner());

@@ -459,10 +459,10 @@ export default function Home() {
               </p>
             </div>
             <Link
-              to="/admin/products"
+              to="/?category=all"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-[#111111] hover:underline"
             >
-              <span>Manage products in Admin</span>
+              <span>Browse collection</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

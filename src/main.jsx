@@ -6,6 +6,7 @@ import App from './App'
 import { CartProvider } from './context/CartContext'
 import { AppProvider } from './context/AppContext'
 import { CLERK_PUBLISHABLE_KEY, isClerkConfigured } from './lib/clerkClient'
+import ClerkAuthSync from './components/auth/ClerkAuthSync'
 import './index.css'
 
 function ClerkProviderWithRoutes({ children }) {
@@ -15,8 +16,7 @@ function ClerkProviderWithRoutes({ children }) {
     return (
       <ClerkProvider
         publishableKey={CLERK_PUBLISHABLE_KEY}
-        routerPush={(to) => navigate(to)}
-        routerReplace={(to) => navigate(to, { replace: true })}
+        navigate={(to) => navigate(to)}
       >
         {children}
       </ClerkProvider>
@@ -32,6 +32,7 @@ function Root() {
       <ClerkProviderWithRoutes>
         <AppProvider>
           <CartProvider>
+            {isClerkConfigured && <ClerkAuthSync />}
             <App />
           </CartProvider>
         </AppProvider>
@@ -45,3 +46,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Root />
   </React.StrictMode>
 )
+

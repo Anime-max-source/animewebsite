@@ -43,9 +43,9 @@ export default function OrderTable({ orders, onUpdateStatus }) {
 
   return (
     <>
-      <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <table className="w-full text-left text-xs text-[#111111]">
-          <thead className="bg-[#F5F5F3] text-[11px] uppercase tracking-wider text-[#8A8A8A] border-b border-slate-100">
+      <div className="overflow-x-auto rounded-xl border border-[#EDEDED] bg-white shadow-2xs">
+        <table className="w-full text-left text-xs text-[#111827]">
+          <thead className="bg-[#F5F6F8] text-[11px] uppercase tracking-wider text-[#6B7280] border-b border-[#EDEDED]">
             <tr>
               <th scope="col" className="px-5 py-3.5 font-semibold">Order ID & Date</th>
               <th scope="col" className="px-5 py-3.5 font-semibold">Buyer Details</th>
@@ -56,48 +56,48 @@ export default function OrderTable({ orders, onUpdateStatus }) {
               <th scope="col" className="px-5 py-3.5 font-semibold text-right">Details</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 font-normal">
+          <tbody className="divide-y divide-[#EDEDED] font-normal">
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-12 text-center text-xs text-[#8A8A8A]">
-                  <p className="font-bold text-sm text-[#111111] mb-1">No orders found</p>
+                <td colSpan={7} className="px-5 py-12 text-center text-xs text-[#6B7280]">
+                  <p className="font-bold text-sm text-[#111827] mb-1">No orders found</p>
                   <p>There are no orders matching this filter yet.</p>
                 </td>
               </tr>
             ) : (
               orders.map((order) => {
               return (
-                <tr key={order.id} className="hover:bg-slate-50/80 transition-colors">
+                <tr key={order.id} className="hover:bg-gray-50/70 transition-colors">
                   
                   {/* ID & Date */}
                   <td className="px-5 py-3.5">
-                    <p className="font-mono font-bold text-[#111111]">#{order.id}</p>
-                    <p className="text-[10px] text-[#8A8A8A] mt-0.5 font-medium">
+                    <p className="font-mono font-bold text-[#111827]">#{order.id}</p>
+                    <p className="text-[10px] text-[#6B7280] mt-0.5 font-medium">
                       {new Date(order.created_at).toLocaleDateString()} • {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </td>
 
                   {/* Buyer Details */}
                   <td className="px-5 py-3.5">
-                    <p className="font-bold text-[#111111]">{order.buyer_name}</p>
+                    <p className="font-bold text-[#111827]">{order.buyer_name}</p>
                     <div className="flex items-center gap-1 text-[11px] text-emerald-600 mt-0.5 font-medium">
                       <MessageSquare className="w-3 h-3" />
-                      <span>{order.buyer_whatsapp}</span>
+                      <span>{order.buyer_whatsapp || order.buyer_phone}</span>
                     </div>
                   </td>
 
                   {/* Items summary */}
                   <td className="px-5 py-3.5">
-                    <div className="max-w-xs truncate text-[#111111] font-medium">
+                    <div className="max-w-xs truncate text-[#111827] font-medium">
                       {order.items.map((i) => `${i.name} (x${i.qty})`).join(', ')}
                     </div>
-                    <span className="text-[10px] text-[#8A8A8A]">
+                    <span className="text-[10px] text-[#6B7280]">
                       {order.items.reduce((acc, i) => acc + i.qty, 0)} total items
                     </span>
                   </td>
 
                   {/* Total */}
-                  <td className="px-5 py-3.5 font-bold text-[#111111] text-sm">
+                  <td className="px-5 py-3.5 font-bold text-[#111827] text-sm">
                     {formatPrice(order.total_amount)}
                   </td>
 
@@ -107,7 +107,7 @@ export default function OrderTable({ orders, onUpdateStatus }) {
                       value={order.status}
                       onChange={(e) => onUpdateStatus(order.id, e.target.value)}
                       aria-label="Order status"
-                      className="bg-[#F5F5F3] border border-slate-200 text-xs text-[#111111] font-semibold rounded-full px-3 py-1.5 focus:outline-none focus:border-[#111111] cursor-pointer"
+                      className="bg-[#F5F6F8] border border-[#EDEDED] text-xs text-[#111827] font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#3B82F6] cursor-pointer"
                     >
                       {statuses.map((s) => (
                         <option key={s.value} value={s.value}>
@@ -124,7 +124,7 @@ export default function OrderTable({ orders, onUpdateStatus }) {
                         href={generateWhatsAppMessage(order)}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#D6FF4A] hover:bg-[#c9f635] text-black shadow-sm transition-all"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-2xs transition-all"
                         title="Open WhatsApp with pre-filled order details & UPI request"
                       >
                         <MessageSquare className="w-3.5 h-3.5" />
@@ -133,7 +133,7 @@ export default function OrderTable({ orders, onUpdateStatus }) {
 
                       <button
                         onClick={() => setShowQrModal(order)}
-                        className="p-1.5 rounded-full bg-slate-100 text-slate-700 hover:text-black hover:bg-slate-200 transition-colors"
+                        className="p-1.5 rounded-lg bg-gray-100 text-[#4B5563] hover:text-[#111827] hover:bg-gray-200 transition-colors"
                         title="View Generated UPI QR Code"
                       >
                         <QrCode className="w-3.5 h-3.5" />
@@ -145,7 +145,7 @@ export default function OrderTable({ orders, onUpdateStatus }) {
                   <td className="px-5 py-3.5 text-right">
                     <button
                       onClick={() => setInspectOrder(order)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-black hover:bg-slate-100 transition-colors"
+                      className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#111827] hover:bg-gray-100 transition-colors"
                       title="Inspect full order"
                     >
                       <Eye className="w-4 h-4" />
@@ -166,12 +166,12 @@ export default function OrderTable({ orders, onUpdateStatus }) {
         title={`Order Inspection #${inspectOrder?.id}`}
       >
         {inspectOrder && (
-          <div className="space-y-4 text-xs text-slate-300">
+          <div className="space-y-4 text-xs text-[#374151]">
             {/* Status & Date */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EDEDED]">
               <div>
-                <p className="text-slate-400">Order Placed On</p>
-                <p className="text-white font-medium">
+                <p className="text-[#6B7280]">Order Placed On</p>
+                <p className="text-[#111827] font-semibold">
                   {new Date(inspectOrder.created_at).toLocaleString()}
                 </p>
               </div>
@@ -179,37 +179,37 @@ export default function OrderTable({ orders, onUpdateStatus }) {
             </div>
 
             {/* Buyer Details */}
-            <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
-              <h4 className="font-semibold text-white uppercase text-[11px] tracking-wider text-[#D6FF4A]">
+            <div className="p-3.5 rounded-xl bg-[#F5F6F8] border border-[#EDEDED] space-y-1.5">
+              <h4 className="font-bold text-[#111827] uppercase text-[11px] tracking-wider">
                 Buyer Delivery Information
               </h4>
-              <p><strong className="text-slate-400">Name:</strong> {inspectOrder.buyer_name}</p>
-              <p><strong className="text-slate-400">Phone:</strong> {inspectOrder.buyer_phone}</p>
-              <p><strong className="text-slate-400">WhatsApp:</strong> {inspectOrder.buyer_whatsapp}</p>
-              <p><strong className="text-slate-400">Shipping Address:</strong> {inspectOrder.buyer_address}</p>
-              <p><strong className="text-slate-400">User Type:</strong> {inspectOrder.user_id ? `Registered (${inspectOrder.user_id})` : 'Guest Checkout'}</p>
+              <p><strong className="text-[#6B7280]">Name:</strong> {inspectOrder.buyer_name}</p>
+              <p><strong className="text-[#6B7280]">Phone:</strong> {inspectOrder.buyer_phone}</p>
+              <p><strong className="text-[#6B7280]">WhatsApp:</strong> {inspectOrder.buyer_whatsapp}</p>
+              <p><strong className="text-[#6B7280]">Shipping Address:</strong> {inspectOrder.buyer_address}</p>
+              <p><strong className="text-[#6B7280]">User Type:</strong> {inspectOrder.user_id ? `Registered (${inspectOrder.user_id})` : 'Guest Checkout'}</p>
             </div>
 
             {/* Ordered Items */}
             <div className="space-y-2">
-              <h4 className="font-semibold text-white uppercase text-[11px] tracking-wider text-[#B8A4FF]">
+              <h4 className="font-bold text-[#111827] uppercase text-[11px] tracking-wider">
                 Purchased Items ({inspectOrder.items.length})
               </h4>
-              <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden">
+              <div className="divide-y divide-[#EDEDED] border border-[#EDEDED] rounded-xl overflow-hidden bg-white">
                 {inspectOrder.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2.5 bg-[#0f121d]">
+                  <div key={idx} className="flex items-center justify-between p-2.5">
                     <div className="flex items-center gap-2.5">
                       <img
                         src={item.image_url}
                         alt={item.name}
-                        className="w-9 h-9 rounded object-cover bg-slate-800"
+                        className="w-9 h-9 rounded-lg object-cover bg-gray-100 border border-[#EDEDED]"
                       />
                       <div>
-                        <p className="font-medium text-white">{item.name}</p>
-                        <p className="text-[10px] text-slate-400">Qty: {item.qty} × {formatPrice(item.price)}</p>
+                        <p className="font-semibold text-[#111827]">{item.name}</p>
+                        <p className="text-[10px] text-[#6B7280]">Qty: {item.qty} × {formatPrice(item.price)}</p>
                       </div>
                     </div>
-                    <span className="font-semibold text-white">
+                    <span className="font-bold text-[#111827]">
                       {formatPrice(item.price * item.qty)}
                     </span>
                   </div>
@@ -218,9 +218,9 @@ export default function OrderTable({ orders, onUpdateStatus }) {
             </div>
 
             {/* Grand Total */}
-            <div className="flex justify-between items-center pt-3 border-t border-slate-800 text-sm font-bold text-white">
+            <div className="flex justify-between items-center pt-3 border-t border-[#EDEDED] text-sm font-bold text-[#111827]">
               <span>Total Payable</span>
-              <span className="text-base text-[#D6FF4A]">{formatPrice(inspectOrder.total_amount)}</span>
+              <span className="text-base text-[#111827]">{formatPrice(inspectOrder.total_amount)}</span>
             </div>
 
             {/* Quick WhatsApp Action */}
@@ -229,7 +229,7 @@ export default function OrderTable({ orders, onUpdateStatus }) {
                 href={generateWhatsAppMessage(inspectOrder)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 px-4 rounded-xl bg-[#D6FF4A] hover:bg-[#c9f635] text-black font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
+                className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-2xs transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Open WhatsApp Chat with {inspectOrder.buyer_name}</span>
@@ -247,13 +247,13 @@ export default function OrderTable({ orders, onUpdateStatus }) {
         maxWidth="max-w-md"
       >
         {showQrModal && (
-          <div className="flex flex-col items-center text-center space-y-4 text-xs text-slate-300">
+          <div className="flex flex-col items-center text-center space-y-4 text-xs text-[#4B5563]">
             <p>
               This QR code can be scanned with Google Pay, PhonePe, or Paytm for{' '}
-              <strong className="text-white">{formatPrice(showQrModal.total_amount)}</strong>.
+              <strong className="text-[#111827]">{formatPrice(showQrModal.total_amount)}</strong>.
             </p>
 
-            <div className="p-4 bg-white rounded-2xl shadow-xl">
+            <div className="p-4 bg-white rounded-2xl border border-[#EDEDED] shadow-sm">
               <img
                 src={generateUpiQrUrl(showQrModal)}
                 alt="UPI QR Code"
@@ -261,16 +261,16 @@ export default function OrderTable({ orders, onUpdateStatus }) {
               />
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 w-full text-center">
-              <p className="text-slate-400 text-[11px]">UPI ID: <strong className="text-white font-mono">{OWNER_UPI_ID}</strong></p>
-              <p className="text-slate-400 text-[11px] mt-0.5">Amount: <strong className="text-[#D6FF4A] font-bold">{formatPrice(showQrModal.total_amount)}</strong></p>
+            <div className="p-3 rounded-xl bg-[#F5F6F8] border border-[#EDEDED] w-full text-center">
+              <p className="text-[#6B7280] text-[11px]">UPI ID: <strong className="text-[#111827] font-mono">{OWNER_UPI_ID}</strong></p>
+              <p className="text-[#6B7280] text-[11px] mt-0.5">Amount: <strong className="text-emerald-700 font-bold">{formatPrice(showQrModal.total_amount)}</strong></p>
             </div>
 
             <a
               href={generateWhatsAppMessage(showQrModal)}
               target="_blank"
               rel="noreferrer"
-              className="w-full py-2.5 px-4 rounded-xl bg-[#D6FF4A] hover:bg-[#c9f635] text-black font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-2xs"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Send QR Link to Buyer's WhatsApp</span>

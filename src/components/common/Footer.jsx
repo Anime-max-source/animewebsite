@@ -108,11 +108,7 @@ export default function Footer() {
             </p>
             <p className="text-xs text-slate-300 font-mono">WhatsApp: {OWNER_WHATSAPP}</p>
             <p className="text-xs text-slate-300 font-mono mt-1">UPI: animemax@upi</p>
-            <div className="mt-4 pt-3 border-t border-slate-800">
-              <Link to="/admin" className="text-xs text-purple-400 hover:text-purple-300 font-medium">
-                Store Owner Portal →
-              </Link>
-            </div>
+
           </div>
 
         </div>

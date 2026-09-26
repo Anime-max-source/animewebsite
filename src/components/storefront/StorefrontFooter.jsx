@@ -82,18 +82,6 @@ export default function StorefrontFooter() {
           </a>
         </div>
 
-        {/* Store Admin shortcut */}
-        <div>
-          <h5 className="font-bold text-[#111111] mb-2 uppercase text-[10px] tracking-wider">Store Admin</h5>
-          <p className="text-[11px] mb-2">Shopkeeper & inventory management portal</p>
-          <Link
-            to="/admin"
-            className="text-[11px] font-bold text-[#111111] hover:underline"
-          >
-            Open Admin Dashboard →
-          </Link>
-        </div>
-
       </div>
 
       {/* Bottom Copyright */}

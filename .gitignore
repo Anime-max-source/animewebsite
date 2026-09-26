@@ -35,3 +35,6 @@ supabase/.temp/
 
 # Vercel deployment cache
 .vercel/
+
+# Screenshot artifacts
+*.png

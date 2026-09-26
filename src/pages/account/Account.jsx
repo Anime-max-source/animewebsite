@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { User, Phone, MessageSquare, MapPin, Package, Check, ShieldCheck } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { User, Phone, MessageSquare, MapPin, Package, Check, ShieldCheck, LogOut } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
 export default function Account() {
-  const { mockUser, getBuyerProfile, saveBuyerProfile } = useApp()
+  const { mockUser, getBuyerProfile, saveBuyerProfile, logout } = useApp()
+  const navigate = useNavigate()
+
+  const handleSignOut = async () => {
+    await logout()
+    navigate('/', { replace: true })
+  }
 
   const [formData, setFormData] = useState({
     phone: '',
@@ -57,12 +63,23 @@ export default function Account() {
           </p>
         </div>
 
-        <Link
-          to="/orders"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-gray-50 border border-black/10 text-gray-700 text-xs font-semibold shadow-sm transition-all"
-        >
-          <Package className="w-4 h-4 text-purple-600" /> View My Orders
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/orders"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-gray-50 border border-black/10 text-gray-700 text-xs font-semibold shadow-sm transition-all"
+          >
+            <Package className="w-4 h-4 text-purple-600" /> View My Orders
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 border border-black/10 text-gray-600 hover:text-rose-600 text-xs font-semibold shadow-sm transition-all"
+            title="Sign out of your account"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
@@ -70,25 +87,38 @@ export default function Account() {
         {/* Profile Card */}
         <div className="p-6 rounded-2xl bg-white border border-black/5 shadow-sm space-y-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#ff3366] to-[#8b5cf6] p-0.5 flex items-center justify-center shadow-sm">
-            <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-xl font-bold text-gray-900">
-              {mockUser.fullName?.charAt(0) || 'U'}
+            <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-xl font-bold text-gray-900 overflow-hidden">
+              {mockUser.imageUrl ? (
+                <img src={mockUser.imageUrl} alt={mockUser.fullName || 'User'} className="w-full h-full object-cover" />
+              ) : (
+                mockUser.fullName?.charAt(0) || 'U'
+              )}
             </div>
           </div>
 
           <div>
             <h3 className="text-base font-bold text-[#111111]">{mockUser.fullName}</h3>
-            <p className="text-xs text-[#6B6B6B] mt-0.5">{mockUser.primaryEmailAddress?.emailAddress || 'Registered Buyer'}</p>
+            <p className="text-xs text-[#6B6B6B] mt-0.5 truncate">{mockUser.primaryEmailAddress?.emailAddress || 'Registered Buyer'}</p>
             <span className="inline-block mt-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200/80 uppercase">
               {mockUser.role} Account
             </span>
           </div>
 
-          <div className="pt-3 border-t border-gray-100 text-xs text-[#6B6B6B] space-y-1.5">
+          <div className="pt-3 border-t border-gray-100 text-xs text-[#6B6B6B] space-y-2">
             <p className="flex items-center gap-1.5 text-emerald-600 font-medium">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Authenticated via Clerk</span>
+              <span>{mockUser.authSource === 'demo' ? 'Local Demo Session' : 'Authenticated via Clerk'}</span>
             </p>
             <p className="text-[11px] text-gray-400 font-mono truncate">ID: {mockUser.id || 'N/A'}</p>
+
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="w-full mt-2 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/50 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
           </div>
         </div>
 
