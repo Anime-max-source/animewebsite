@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { 
-  ShoppingCart, 
-  ArrowLeft, 
-  Check, 
-  ShieldCheck, 
-  Truck, 
-  MessageSquare, 
-  Minus, 
-  Plus, 
-  Sparkles,
-  Share2
-} from 'lucide-react'
+import {
+  ShoppingCart,
+  ArrowLeft,
+  Check,
+  ShieldCheck,
+  Truck,
+  ChatCircle,
+  Minus,
+  Plus,
+  ShareNetwork
+} from '@phosphor-icons/react'
 import { useApp } from '../../context/AppContext'
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
@@ -32,14 +31,14 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="py-20 text-center space-y-4 max-w-md mx-auto p-8 rounded-2xl bg-white border border-black/5 shadow-sm">
-        <h2 className="text-2xl font-black text-[#111111] font-display">Product Not Found</h2>
-        <p className="text-xs text-[#6B6B6B] font-medium">The anime collectible you are looking for does not exist or has been removed.</p>
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#111111] hover:bg-black text-xs font-bold text-white shadow-sm transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" /> Return to Catalog
+      <div className="sf-empty-state max-w-md mx-auto my-20">
+        <ArrowLeft size={32} className="text-[#6B6B6B] mb-4" />
+        <h2 className="text-xl font-bold text-[#111111] mb-2 font-['Syne']">Product Not Found</h2>
+        <p className="text-sm text-[#6B6B6B] mb-6 max-w-[45ch] font-['Inter']">
+          The anime collectible you are looking for does not exist or has been removed.
+        </p>
+        <Link to="/" className="sf-btn-primary inline-flex items-center gap-2">
+          <ArrowLeft size={16} /> Return to Catalog
         </Link>
       </div>
     )
@@ -49,7 +48,6 @@ export default function ProductDetail() {
   const cartItem = items.find((i) => i.id === product.id)
   const isAlreadyInCart = Boolean(cartItem)
 
-  // Related products from same category
   const relatedProducts = products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4)
@@ -69,14 +67,15 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="space-y-12 pb-12">
-      {/* Back button & Breadcrumb */}
+    <div className="space-y-10 pb-12" style={{ fontFamily: 'Inter, sans-serif' }}>
+
+      {/* ── Breadcrumb / Back ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between text-xs text-[#6B6B6B]">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 hover:text-[#111111] font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 hover:text-[#111111] font-medium transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Products
+          <ArrowLeft size={16} /> Back to Products
         </button>
 
         <div className="flex items-center gap-2 font-medium">
@@ -86,16 +85,16 @@ export default function ProductDetail() {
             {product.category}
           </Link>
           <span>/</span>
-          <span className="text-[#111111] font-bold truncate max-w-xs">{product.name}</span>
+          <span className="text-[#111111] font-semibold truncate max-w-xs">{product.name}</span>
         </div>
       </div>
 
-      {/* Main Details Grid */}
+      {/* ── Main Details Grid ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        
-        {/* Product Image Gallery Column */}
+
+        {/* Product Image */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-white border border-black/5 shadow-sm">
+          <div className="relative aspect-[4/5] rounded-[12px] overflow-hidden bg-[#F8F8F6] border border-[#E5E5E5]">
             <img
               src={product.image_url}
               alt={product.name}
@@ -103,8 +102,8 @@ export default function ProductDetail() {
               className={`w-full h-full object-cover object-center ${isSoldOut ? 'grayscale-[30%]' : ''}`}
             />
             {isSoldOut && (
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center">
-                <span className="px-5 py-2 rounded-xl bg-rose-600 text-white font-bold text-sm tracking-widest uppercase shadow-2xl">
+              <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(17,17,17,0.4)' }}>
+                <span className="px-5 py-2 rounded-[12px] bg-[#DC2626] text-white font-bold text-sm tracking-widest uppercase">
                   Sold Out
                 </span>
               </div>
@@ -112,13 +111,14 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Product Information Column */}
+        {/* Product Info */}
         <div className="lg:col-span-6 space-y-6">
-          
-          <div className="space-y-3">
+
+          {/* Badges + Title + Price */}
+          <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
               {product.hw_num && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-black border border-amber-500 shadow-sm">
+                <span className="inline-flex items-center px-3 py-1 rounded-[12px] text-xs font-bold bg-[#111111] text-white border-none font-['Inter']">
                   Collector HW# {product.hw_num}
                 </span>
               )}
@@ -126,104 +126,108 @@ export default function ProductDetail() {
               <StockBadge inStock={product.in_stock} stock={product.stock} />
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-[#111111] tracking-tight leading-snug font-display">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight leading-snug" style={{ fontFamily: 'Syne, sans-serif' }}>
               {product.name}
             </h1>
 
-            <div className="flex items-baseline gap-4 pt-2">
-              <span className="text-3xl font-black text-[#111111] font-display">
+            <div className="flex items-baseline gap-4">
+              <span className="text-3xl font-bold text-[#DC2626]" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {formatPrice(product.price)}
               </span>
-              <span className="text-xs text-emerald-800 font-bold bg-[#E3EFE1] px-3 py-1 rounded-full border border-emerald-300">
-                Free Express Delivery
+              <span className="sf-badge text-xs">
+                Free Delivery
               </span>
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-[#6B6B6B] leading-relaxed pt-2 border-t border-black/5 font-medium">
+          {/* Description */}
+          <p className="text-sm text-[#6B6B6B] leading-relaxed max-w-[70ch] pt-4 border-t border-[#E5E5E5]">
             {product.description}
           </p>
 
-          {/* Collector Specifications Box */}
-          <div className="p-4 rounded-2xl bg-white border border-black/5 shadow-sm space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#6B6B6B]">Collector Specifications</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+          {/* Collector Specifications */}
+          <div className="p-4 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#6B6B6B]">Collector Specifications</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
               {product.hw_num && (
-                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="block text-[10px] text-[#8A8A8A] font-semibold uppercase">Collector #</span>
-                  <span className="font-black text-amber-700 text-sm">HW# {product.hw_num}</span>
+                <div className="p-2.5 rounded-[12px] bg-white border border-[#E5E5E5]">
+                  <span className="block text-[10px] text-[#6B6B6B] font-semibold uppercase tracking-wider mb-0.5">Collector #</span>
+                  <span className="font-bold text-[#111111]">HW# {product.hw_num}</span>
                 </div>
               )}
               {product.series && (
-                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="block text-[10px] text-[#8A8A8A] font-semibold uppercase">Series</span>
+                <div className="p-2.5 rounded-[12px] bg-white border border-[#E5E5E5]">
+                  <span className="block text-[10px] text-[#6B6B6B] font-semibold uppercase tracking-wider mb-0.5">Series</span>
                   <span className="font-bold text-[#111111]">{product.series}</span>
                 </div>
               )}
               {product.edition && (
-                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="block text-[10px] text-[#8A8A8A] font-semibold uppercase">Edition</span>
+                <div className="p-2.5 rounded-[12px] bg-white border border-[#E5E5E5]">
+                  <span className="block text-[10px] text-[#6B6B6B] font-semibold uppercase tracking-wider mb-0.5">Edition</span>
                   <span className="font-bold text-[#111111]">{product.edition}</span>
                 </div>
               )}
               {product.color && (
-                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="block text-[10px] text-[#8A8A8A] font-semibold uppercase">Color</span>
+                <div className="p-2.5 rounded-[12px] bg-white border border-[#E5E5E5]">
+                  <span className="block text-[10px] text-[#6B6B6B] font-semibold uppercase tracking-wider mb-0.5">Color</span>
                   <span className="font-bold text-[#111111]">{product.color}</span>
                 </div>
               )}
               {product.sort_order !== undefined && (
-                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                  <span className="block text-[10px] text-[#8A8A8A] font-semibold uppercase">Catalog Position</span>
+                <div className="p-2.5 rounded-[12px] bg-white border border-[#E5E5E5]">
+                  <span className="block text-[10px] text-[#6B6B6B] font-semibold uppercase tracking-wider mb-0.5">Catalog Position</span>
                   <span className="font-bold text-[#111111]">#{product.sort_order}</span>
                 </div>
               )}
-              <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
-                <span className="block text-[10px] text-[#8A8A8A] font-semibold uppercase">Scale</span>
+              <div className="p-2.5 rounded-[12px] bg-white border border-[#E5E5E5]">
+                <span className="block text-[10px] text-[#6B6B6B] font-semibold uppercase tracking-wider mb-0.5">Scale</span>
                 <span className="font-bold text-[#111111]">1:64 Die-Cast</span>
               </div>
             </div>
           </div>
 
-          {/* Add to Cart Actions */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white border border-black/5 shadow-sm space-y-4">
-            
+          {/* Add to Cart */}
+          <div className="p-5 sm:p-6 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] space-y-4">
             {!isSoldOut ? (
               <div className="space-y-4">
                 {/* Quantity selector */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#111111]">Quantity</span>
-                  <div className="flex items-center gap-2 bg-[#F5F5F3] p-1.5 rounded-full border border-stone-200">
+                  <span className="text-sm font-semibold text-[#111111]">Quantity</span>
+                  <div className="flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[12px] px-2 py-1">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-[#111111] hover:bg-white transition-colors"
+                      className="w-7 h-7 rounded-[12px] flex items-center justify-center text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
                     >
-                      <Minus className="w-3.5 h-3.5" />
+                      <Minus size={14} />
                     </button>
-                    <span className="text-xs font-bold text-[#111111] w-8 text-center">
+                    <span className="text-sm font-bold text-[#111111] w-8 text-center">
                       {quantity}
                     </span>
                     <button
                       onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-[#111111] hover:bg-white transition-colors"
+                      className="w-7 h-7 rounded-[12px] flex items-center justify-center text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus size={14} />
                     </button>
                   </div>
                 </div>
 
-                {/* Main CTA */}
+                {/* Add to Cart CTA */}
                 <button
                   onClick={handleAddToCart}
-                  className="w-full py-4 px-6 rounded-full bg-gradient-to-r from-[#ff3366] to-[#8b5cf6] hover:opacity-95 text-white font-bold text-sm tracking-wide shadow-glow-primary transition-all flex items-center justify-center gap-2 transform active:scale-[0.99]"
+                  className="sf-btn-primary w-full gap-2"
                 >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>{isAlreadyInCart ? 'Add More to Cart' : `Add ${quantity} to Cart • ${formatPrice(product.price * quantity)}`}</span>
+                  <ShoppingCart size={20} />
+                  <span>
+                    {isAlreadyInCart
+                      ? 'Add More to Cart'
+                      : `Add ${quantity} to Cart · ${formatPrice(product.price * quantity)}`}
+                  </span>
                 </button>
               </div>
             ) : (
-              <div className="text-center py-4 space-y-2">
-                <p className="text-rose-600 font-bold text-sm">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-[#DC2626]">
                   This collectible is currently Sold Out.
                 </p>
                 <p className="text-xs text-[#6B6B6B]">
@@ -231,50 +235,48 @@ export default function ProductDetail() {
                 </p>
                 <button
                   disabled
-                  className="w-full py-3.5 px-6 rounded-full bg-slate-100 text-slate-400 font-bold text-xs cursor-not-allowed border border-slate-200"
+                  className="sf-btn-primary w-full opacity-40 cursor-not-allowed"
                 >
                   Sold Out
                 </button>
               </div>
             )}
 
-            {/* Share and wishlist */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-[#6B6B6B]">
-              <span className="text-[11px]">Product ID: <strong className="font-mono text-[#111111]">{product.id}</strong></span>
+            {/* Share / Product ID */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#E5E5E5] text-xs text-[#6B6B6B]">
+              <span>ID: <strong className="font-mono text-[#111111]">{product.id}</strong></span>
               <button
                 onClick={handleShare}
-                className="inline-flex items-center gap-1.5 hover:text-[#111111] font-semibold transition-colors"
+                className="inline-flex items-center gap-1.5 hover:text-[#111111] font-medium transition-colors"
               >
-                <Share2 className="w-3.5 h-3.5" />
+                <ShareNetwork size={16} />
                 <span>{copied ? 'Link Copied!' : 'Share Product'}</span>
               </button>
             </div>
-
           </div>
 
-          {/* Guarantees Box */}
+          {/* Guarantees */}
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3.5 rounded-2xl bg-white border border-black/5 shadow-xs flex items-center gap-2.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span className="text-[#111111] font-medium">100% Authentic Hot Wheels</span>
+            <div className="p-3.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center gap-2.5">
+              <ShieldCheck size={20} className="text-[#111111] flex-shrink-0" />
+              <span className="text-[#111111] font-medium">100% Authentic Merch</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-white border border-black/5 shadow-xs flex items-center gap-2.5">
-              <MessageSquare className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span className="text-[#111111] font-medium">WhatsApp Payment Support</span>
+            <div className="p-3.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center gap-2.5">
+              <ChatCircle size={20} className="text-[#111111] flex-shrink-0" />
+              <span className="text-[#111111] font-medium">WhatsApp UPI Payment</span>
             </div>
           </div>
 
         </div>
-
       </div>
 
-      {/* Related Products Section */}
+      {/* ── Related Products ────────────────────────────────────────────── */}
       {relatedProducts.length > 0 && (
-        <div className="pt-10 border-t border-black/5">
-          <h3 className="text-xl font-black text-[#111111] tracking-tight font-display mb-6">
+        <div className="pt-10 border-t border-[#E5E5E5]">
+          <h3 className="text-2xl font-bold text-[#111111] tracking-tight mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
             You Might Also Like
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

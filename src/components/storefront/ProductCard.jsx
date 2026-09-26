@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Eye, Check } from 'lucide-react'
+import { ShoppingCart, Eye, Check } from '@phosphor-icons/react'
 import { formatPrice } from '../../utils/formatPrice'
 import { StockBadge, CategoryBadge } from '../common/Badge'
 import { useCart } from '../../context/CartContext'
@@ -21,76 +21,77 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <div className={`group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-black/5 hover:border-black/10 transition-all duration-300 shadow-sm hover:shadow-md ${isSoldOut ? 'opacity-85' : ''}`}>
-      
+    <div className={`sf-product-card group relative flex flex-col ${isSoldOut ? 'opacity-80' : ''}`}>
+
       {/* Product Image & Badges */}
-      <Link to={`/product/${product.id}`} className="relative aspect-[4/5] overflow-hidden bg-slate-100 block">
+      <Link to={`/product/${product.id}`} className="relative aspect-[4/5] overflow-hidden bg-[#F8F8F6] block">
         <img
           src={product.image_url}
           alt={product.name}
           loading="lazy"
           onError={handleImageError}
-          className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${isSoldOut ? 'grayscale-[40%]' : ''}`}
+          className={`sf-product-img w-full h-full object-cover object-center ${isSoldOut ? 'grayscale-[30%]' : ''}`}
         />
 
-        {/* Top badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+        {/* Top-left badges */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
           {product.hw_num && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-black tracking-wider uppercase bg-amber-400 text-black border border-amber-500 shadow-sm">
+            <span className="sf-badge text-[10px] bg-[#111111] text-white border-none px-2 py-0.5 rounded-[12px] font-bold tracking-wider uppercase font-['Inter']">
               HW# {product.hw_num}
             </span>
           )}
           <CategoryBadge category={product.series || product.category} />
         </div>
 
-        <div className="absolute top-3 right-3 z-10">
+        {/* Top-right: stock badge */}
+        <div className="absolute top-2.5 right-2.5 z-10">
           <StockBadge inStock={product.in_stock} stock={product.stock} />
         </div>
 
-        {/* Sold out overlay banner if not in stock */}
+        {/* Sold out overlay */}
         {isSoldOut && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center">
-            <div className="px-4 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs tracking-widest uppercase shadow-lg transform -rotate-6">
+          <div className="absolute inset-0 bg-[rgba(17,17,17,0.4)] flex items-center justify-center">
+            <span className="px-4 py-1.5 rounded-[12px] bg-[#DC2626] text-white font-bold text-xs tracking-widest uppercase font-['Inter']">
               Sold Out
-            </div>
+            </span>
           </div>
         )}
       </Link>
 
       {/* Product Details */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
+      <div className="p-4 flex-1 flex flex-col justify-between bg-[#F8F8F6]">
         <div>
           <Link to={`/product/${product.id}`}>
-            <h3 className="text-[#111111] font-bold text-sm line-clamp-2 hover:text-rose-600 transition-colors leading-snug">
+            <h3 className="text-[#111111] font-semibold text-sm line-clamp-2 hover:text-[#DC2626] transition-colors leading-snug font-['Inter']">
               {product.name}
             </h3>
           </Link>
 
           {(product.edition || product.color) && (
-            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#6B6B6B] font-semibold truncate">
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-[#6B6B6B] truncate font-['Inter']">
               {product.edition && (
-                <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-800 text-[10px] font-bold">
+                <span className="px-1.5 py-0.5 rounded-[12px] bg-white border border-[#E5E5E5] text-[10px] font-semibold text-[#111111]">
                   {product.edition}
                 </span>
               )}
               {product.color && product.color !== product.edition && (
-                <span className="text-gray-500 truncate text-[11px]">
-                  • {product.color}
+                <span className="text-[#6B6B6B] truncate text-[11px]">
+                  · {product.color}
                 </span>
               )}
             </div>
           )}
 
-          <p className="text-xs text-[#6B6B6B] line-clamp-2 mt-1.5 leading-relaxed font-medium">
+          <p className="text-xs text-[#6B6B6B] line-clamp-2 mt-1.5 leading-relaxed font-['Inter']">
             {product.description}
           </p>
         </div>
 
-        {/* Price & Action Button */}
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+        {/* Price & Action */}
+        <div className="mt-4 pt-3 border-t border-[#E5E5E5] flex items-center justify-between gap-2">
           <div>
-            <span className="text-[11px] text-[#8A8A8A] block font-semibold uppercase">Price</span>
-            <span className="text-base font-black text-[#111111] tracking-tight">
+            <span className="text-[10px] text-[#6B6B6B] block font-semibold uppercase tracking-wider font-['Inter']">Price</span>
+            <span className="text-base font-bold text-[#DC2626] tracking-tight font-['Inter']">
               {formatPrice(product.price)}
             </span>
           </div>
@@ -98,32 +99,33 @@ export default function ProductCard({ product }) {
           <div className="flex items-center gap-1.5">
             <Link
               to={`/product/${product.id}`}
-              className="p-2 rounded-xl text-[#6B6B6B] hover:text-[#111111] hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-colors"
               title="View Details"
             >
-              <Eye className="w-4 h-4" />
+              <Eye size={16} />
             </Link>
 
             <button
               onClick={handleQuickAdd}
               disabled={isSoldOut}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={[
+                'flex items-center gap-1.5 px-3 py-2 rounded-[12px] text-xs font-semibold transition-all font-[\'Inter\']',
                 isSoldOut
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                  ? 'bg-[#F8F8F6] text-[#6B6B6B] cursor-not-allowed border border-[#E5E5E5]'
                   : isAlreadyInCart
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
-                  : 'bg-gradient-to-r from-[#ff3366] to-[#e02456] hover:from-[#ff4d7d] hover:to-[#ff3366] text-white shadow-sm'
-              }`}
+                  ? 'bg-white text-[#111111] border border-[#E5E5E5] hover:bg-[#F1F1EE]'
+                  : 'bg-[#DC2626] hover:bg-[#B91C1C] text-white border-none'
+              ].join(' ')}
               title={isSoldOut ? 'Item is sold out' : 'Add to cart'}
             >
               {isAlreadyInCart && !isSoldOut ? (
                 <>
-                  <Check className="w-3.5 h-3.5" />
+                  <Check size={14} />
                   <span>Added</span>
                 </>
               ) : (
                 <>
-                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <ShoppingCart size={14} />
                   <span>{isSoldOut ? 'Sold Out' : 'Add'}</span>
                 </>
               )}

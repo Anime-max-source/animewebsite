@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL / ADMIN CSS TOKENS
+   These variables power the admin panel — DO NOT change them.
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root {
   --bg-sidebar: #FFFFFF;
   --bg-content: #F5F6F8;
@@ -15,22 +19,363 @@
   --text-muted: #6B7280;
 }
 
+/* Admin body base: keep Outfit font and admin bg */
 @layer base {
   body {
-    background-color: #E3EFE1;
-    color: #111111;
+    background-color: #F5F6F8;
+    color: #111827;
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
   }
 }
 
-/* Custom modern scrollbars */
+/* ═══════════════════════════════════════════════════════════════════════════
+   KINETIC EDITORIAL — STOREFRONT DESIGN TOKENS
+   Scoped under [data-theme="storefront"] so they NEVER bleed into admin.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="storefront"] {
+  /* Canvas */
+  --sf-canvas: #FFFFFF;
+  --sf-surface: #F8F8F6;
+  --sf-surface-hov: #F1F1EE;
+  /* Accent */
+  --sf-accent: #DC2626;
+  --sf-accent-hov: #B91C1C;
+  /* Text */
+  --sf-text-primary: #111111;
+  --sf-text-muted: #6B6B6B;
+  /* Border */
+  --sf-border: #E5E5E5;
+  /* Radius — single value across all elements */
+  --sf-radius: 0.75rem;  /* 12px */
+  /* Fonts */
+  --sf-font-display: 'Syne', sans-serif;
+  --sf-font-body: 'Inter', sans-serif;
+  /* Spacing scale */
+  --sf-space-xs: 0.25rem;
+  --sf-space-sm: 0.5rem;
+  --sf-space-md: 1rem;
+  --sf-space-lg: 1.5rem;
+  --sf-space-xl: 2rem;
+  --sf-space-2xl: 3rem;
+
+  /* Override body defaults for storefront scope */
+  font-family: var(--sf-font-body);
+  background-color: var(--sf-canvas);
+  color: var(--sf-text-primary);
+}
+
+/* ─── Storefront Typography ─────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-display-xl {
+  font-family: var(--sf-font-display);
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 52px;
+  letter-spacing: -0.03em;
+}
+[data-theme="storefront"] .sf-headline-lg {
+  font-family: var(--sf-font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 38px;
+  letter-spacing: -0.02em;
+}
+[data-theme="storefront"] .sf-headline-md {
+  font-family: var(--sf-font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+  letter-spacing: -0.01em;
+}
+[data-theme="storefront"] .sf-headline-sm {
+  font-family: var(--sf-font-display);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 26px;
+}
+[data-theme="storefront"] .sf-body-lg {
+  font-family: var(--sf-font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+[data-theme="storefront"] .sf-body-md {
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+[data-theme="storefront"] .sf-body-sm {
+  font-family: var(--sf-font-body);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.01em;
+}
+[data-theme="storefront"] .sf-label-lg {
+  font-family: var(--sf-font-body);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+}
+[data-theme="storefront"] .sf-label-md {
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0.01em;
+}
+[data-theme="storefront"] .sf-label-sm {
+  font-family: var(--sf-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Storefront Scrollbar ──────────────────────────────────────────────── */
+[data-theme="storefront"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+[data-theme="storefront"] ::-webkit-scrollbar-track {
+  background: var(--sf-surface);
+}
+[data-theme="storefront"] ::-webkit-scrollbar-thumb {
+  background: var(--sf-border);
+  border-radius: var(--sf-radius);
+}
+[data-theme="storefront"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--sf-text-muted);
+}
+
+/* ─── Storefront Button Base ────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 48px;
+  padding: 0 1.5rem;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--sf-radius);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+[data-theme="storefront"] .sf-btn-primary:hover {
+  background: #B91C1C;
+}
+[data-theme="storefront"] .sf-btn-primary:disabled {
+  background: var(--sf-surface);
+  color: var(--sf-text-muted);
+  border: 1px solid var(--sf-border);
+  cursor: not-allowed;
+}
+
+[data-theme="storefront"] .sf-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 48px;
+  padding: 0 1.5rem;
+  background: transparent;
+  color: #111111;
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--sf-radius);
+  border: 1px solid var(--sf-border);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  text-decoration: none;
+}
+[data-theme="storefront"] .sf-btn-secondary:hover {
+  background: var(--sf-surface-hov);
+  border-color: #111111;
+}
+
+[data-theme="storefront"] .sf-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: #111111;
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--sf-radius);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+[data-theme="storefront"] .sf-btn-ghost:hover {
+  background: var(--sf-surface);
+}
+
+/* ─── Storefront Form Inputs ────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-input {
+  width: 100%;
+  height: 48px;
+  background: #FFFFFF;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  padding: 0 1rem;
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  color: #111111;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+[data-theme="storefront"] .sf-input:focus {
+  border-color: #DC2626;
+}
+[data-theme="storefront"] .sf-input::placeholder {
+  color: var(--sf-text-muted);
+}
+
+[data-theme="storefront"] .sf-textarea {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  padding: 0.75rem 1rem;
+  font-family: var(--sf-font-body);
+  font-size: 14px;
+  color: #111111;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+[data-theme="storefront"] .sf-textarea:focus {
+  border-color: #DC2626;
+}
+
+/* ─── Storefront Product Card ────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-product-card {
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+[data-theme="storefront"] .sf-product-card:hover {
+  border-color: #DC2626;
+}
+[data-theme="storefront"] .sf-product-card:hover .sf-product-img {
+  transform: scale(1.02);
+}
+[data-theme="storefront"] .sf-product-img {
+  transition: transform 0.4s ease;
+}
+
+/* ─── Storefront Badge ───────────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--sf-radius);
+  border: 1px solid var(--sf-border);
+  background: #FFFFFF;
+  font-family: var(--sf-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: #111111;
+  white-space: nowrap;
+}
+[data-theme="storefront"] .sf-badge-accent {
+  background: #DC2626;
+  color: #FFFFFF;
+  border: none;
+}
+
+/* ─── Storefront Filter Chip ─────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-chip {
+  height: 36px;
+  padding: 0 1rem;
+  border-radius: var(--sf-radius);
+  border: 1px solid var(--sf-border);
+  background: #FFFFFF;
+  font-family: var(--sf-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sf-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+[data-theme="storefront"] .sf-chip:hover {
+  color: #111111;
+  border-color: #111111;
+}
+[data-theme="storefront"] .sf-chip.active {
+  border-color: #DC2626;
+  color: #DC2626;
+  background: #FFFFFF;
+}
+
+/* ─── Storefront Card / Panel ────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-card {
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+}
+[data-theme="storefront"] .sf-card-white {
+  background: #FFFFFF;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+}
+
+/* ─── Storefront Empty State ─────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-empty-state {
+  background: var(--sf-surface);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  padding: 48px;
+}
+
+/* ─── Storefront Modal Overlay ───────────────────────────────────────────── */
+[data-theme="storefront"] .sf-modal-scrim {
+  background: rgba(17, 17, 17, 0.4);
+}
+[data-theme="storefront"] .sf-modal-panel {
+  background: #FFFFFF;
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+}
+
+/* ─── Storefront separator ───────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-divider {
+  border-top: 1px solid var(--sf-border);
+}
+
+/* ─── Table/List rows ────────────────────────────────────────────────────── */
+[data-theme="storefront"] .sf-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--sf-border);
+  transition: background 0.12s ease;
+}
+[data-theme="storefront"] .sf-row:hover {
+  background: var(--sf-surface-hov);
+  border-radius: var(--sf-radius);
+}
+
+/* ─── Admin global scrollbar (existing, untouched) ───────────────────────── */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #E3EFE1;
+  background: #F5F6F8;
 }
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
@@ -40,27 +385,24 @@
   background: #94A3B8;
 }
 
-/* Custom glassmorphism utilities */
+/* ─── Admin custom utilities (untouched) ─────────────────────────────────── */
 .glass-panel {
   background: rgba(18, 22, 36, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
-
 .glass-dropdown {
   background: rgba(15, 18, 30, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .anime-gradient-text {
   background: linear-gradient(135deg, #ffffff 0%, #ff3366 50%, #8b5cf6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .anime-badge {
   background: linear-gradient(135deg, rgba(255, 51, 102, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
   border: 1px solid rgba(255, 51, 102, 0.3);
@@ -71,7 +413,22 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
-
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+/* Fade-in / slide-in for storefront overlays (no animation library dependency) */
+@keyframes sf-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes sf-slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sf-animate-fade-in {
+  animation: sf-fade-in 0.2s ease;
+}
+.sf-animate-slide-up {
+  animation: sf-slide-up 0.25s ease;
 }

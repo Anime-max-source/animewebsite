@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MessageSquare, ShieldCheck, MapPin, User, Phone, CheckCircle, AlertCircle } from 'lucide-react'
+import {
+  ChatCircle,
+  ShieldCheck,
+  MapPin,
+  User,
+  Phone,
+  CheckCircle,
+  Warning
+} from '@phosphor-icons/react'
 import { useCart } from '../../context/CartContext'
 import { useApp } from '../../context/AppContext'
 import { validateCheckoutForm } from '../../utils/validators'
@@ -21,7 +29,6 @@ export default function CheckoutForm() {
   const [sameAsPhone, setSameAsPhone] = useState(true)
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const [submitError, setSubmitError] = useState(null)
 
   // Pre-fill if signed in and profile exists
@@ -47,7 +54,6 @@ export default function CheckoutForm() {
       }
       return next
     })
-    // Clear error for edited field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }))
     }
@@ -83,7 +89,7 @@ export default function CheckoutForm() {
 
     try {
       const orderPayload = {
-        user_id: mockUser.id || null, // null for guest checkout
+        user_id: mockUser.id || null,
         buyer_name: formData.buyer_name.trim(),
         buyer_phone: formData.buyer_phone.trim(),
         buyer_whatsapp: formData.buyer_whatsapp.trim(),
@@ -100,18 +106,15 @@ export default function CheckoutForm() {
 
       const created = await createOrder(orderPayload)
 
-      // Trigger celebratory confetti
+      // Subtle confetti (brand colors: crimson only)
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 60,
+        spread: 55,
         origin: { y: 0.6 },
-        colors: ['#ff3366', '#8b5cf6', '#06b6d4', '#f59e0b']
+        colors: ['#DC2626', '#B91C1C', '#111111']
       })
 
-      // Clear cart
       clearCart()
-
-      // Redirect to Order Confirmation page
       navigate(`/order-confirmation/${created.id}`)
     } catch (err) {
       console.error('Failed to submit order', err)
@@ -122,60 +125,62 @@ export default function CheckoutForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      
-      {/* Submission Error Banner */}
+    <form onSubmit={handleSubmit} className="space-y-5" style={{ fontFamily: 'Inter, sans-serif' }}>
+
+      {/* Error Banner */}
       {submitError && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-3 shadow-sm animate-shake">
-          <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
+        <div className="p-4 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] text-[#111111] text-sm flex items-start gap-3">
+          <Warning size={20} className="text-[#DC2626] flex-shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="font-bold text-rose-950">Unable to complete order</h4>
-            <p className="text-rose-700">{submitError}</p>
+            <h4 className="font-semibold text-[#111111]">Unable to complete order</h4>
+            <p className="text-[#6B6B6B] text-sm">{submitError}</p>
           </div>
         </div>
       )}
 
-      {/* Sign-in status prompt */}
+      {/* Auth status */}
       {mockUser.role === 'guest' ? (
-        <div className="p-3.5 rounded-2xl bg-[#F5F5F3] border border-stone-200/80 text-xs text-stone-700 flex items-center justify-between">
+        <div className="p-3.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] text-sm text-[#6B6B6B] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-base">👤</span>
-            <span>Checking out as <strong>Guest</strong> (Account optional).</span>
+            <User size={16} className="text-[#6B6B6B]" />
+            <span>Checking out as <strong className="text-[#111111]">Guest</strong> (Account optional).</span>
           </div>
           <button
             type="button"
             onClick={() => navigate('/signin')}
-            className="text-rose-600 hover:text-rose-700 font-bold underline text-xs transition-colors"
+            className="text-[#DC2626] hover:underline font-semibold text-sm transition-colors"
           >
-            Sign In to save address
+            Sign In
           </button>
         </div>
       ) : (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+        <div className="p-3.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] text-sm text-[#111111] flex items-center gap-2">
+          <CheckCircle size={16} className="text-[#111111] flex-shrink-0" />
           <span>Signed in as <strong>{mockUser.fullName}</strong>. Details will auto-save to your account.</span>
         </div>
       )}
 
       {/* WhatsApp payment advisory */}
-      <div className="p-4 rounded-2xl bg-[#E3EFE1] border border-emerald-300/80 text-xs text-emerald-950 shadow-xs">
+      <div className="p-4 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5]">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0 shadow-xs">
-            <MessageSquare className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-[12px] bg-white border border-[#E5E5E5] flex items-center justify-center flex-shrink-0">
+            <ChatCircle size={20} className="text-[#111111]" />
           </div>
           <div>
-            <h4 className="font-bold text-emerald-950 text-sm font-display">Manual UPI Payment on WhatsApp</h4>
-            <p className="text-emerald-900 mt-1 leading-relaxed font-medium">
-              After placing this order, you do NOT pay on this screen. The AnimeMax owner will review your order and send a custom <strong>UPI QR code</strong> directly to your WhatsApp number within 5–15 minutes!
+            <h4 className="font-bold text-[#111111] text-sm mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>
+              Manual UPI Payment on WhatsApp
+            </h4>
+            <p className="text-sm text-[#6B6B6B] leading-relaxed">
+              After placing this order, you do NOT pay on this screen. The AnimeMax owner will review your order and send a custom <strong className="text-[#111111]">UPI QR code</strong> directly to your WhatsApp within 5–15 minutes.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Customer Full Name */}
+      {/* Full Name */}
       <div>
-        <label className="block text-xs font-bold text-[#111111] mb-1.5">
-          Full Name <span className="text-rose-500">*</span>
+        <label className="block text-sm font-semibold text-[#111111] mb-1.5">
+          Full Name <span className="text-[#DC2626]">*</span>
         </label>
         <div className="relative">
           <input
@@ -184,21 +189,22 @@ export default function CheckoutForm() {
             value={formData.buyer_name}
             onChange={handleChange}
             placeholder="Your full name"
-            className={`w-full bg-[#F5F5F3] border ${errors.buyer_name ? 'border-rose-500' : 'border-stone-200'} rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#111111] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#ff3366] transition-all`}
+            className="sf-input pl-10"
+            style={{ borderColor: errors.buyer_name ? '#DC2626' : undefined }}
           />
-          <User className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+          <User size={16} className="text-[#6B6B6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
         {errors.buyer_name && (
-          <p className="text-rose-600 text-xs mt-1.5 flex items-center gap-1 font-medium">
-            <AlertCircle className="w-3.5 h-3.5" /> {errors.buyer_name}
+          <p className="text-[#DC2626] text-xs mt-1.5 flex items-center gap-1 font-medium">
+            <Warning size={14} /> {errors.buyer_name}
           </p>
         )}
       </div>
 
       {/* Phone Number */}
       <div>
-        <label className="block text-xs font-bold text-[#111111] mb-1.5">
-          Mobile Phone Number (for delivery SMS/calls) <span className="text-rose-500">*</span>
+        <label className="block text-sm font-semibold text-[#111111] mb-1.5">
+          Mobile Phone Number <span className="text-[#DC2626]">*</span>
         </label>
         <div className="relative">
           <input
@@ -207,29 +213,30 @@ export default function CheckoutForm() {
             value={formData.buyer_phone}
             onChange={handleChange}
             placeholder="10-digit mobile number"
-            className={`w-full bg-[#F5F5F3] border ${errors.buyer_phone ? 'border-rose-500' : 'border-stone-200'} rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#111111] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#ff3366] transition-all`}
+            className="sf-input pl-10"
+            style={{ borderColor: errors.buyer_phone ? '#DC2626' : undefined }}
           />
-          <Phone className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+          <Phone size={16} className="text-[#6B6B6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
         {errors.buyer_phone && (
-          <p className="text-rose-600 text-xs mt-1.5 flex items-center gap-1 font-medium">
-            <AlertCircle className="w-3.5 h-3.5" /> {errors.buyer_phone}
+          <p className="text-[#DC2626] text-xs mt-1.5 flex items-center gap-1 font-medium">
+            <Warning size={14} /> {errors.buyer_phone}
           </p>
         )}
       </div>
 
-      {/* WhatsApp Number checkbox & field */}
+      {/* WhatsApp Number */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-[#111111]">
-            WhatsApp Number (Required for receiving UPI QR) <span className="text-rose-500">*</span>
+          <label className="block text-sm font-semibold text-[#111111]">
+            WhatsApp Number (for UPI QR) <span className="text-[#DC2626]">*</span>
           </label>
-          <label className="flex items-center gap-1.5 text-xs text-stone-600 cursor-pointer select-none">
+          <label className="flex items-center gap-1.5 text-sm text-[#6B6B6B] cursor-pointer select-none">
             <input
               type="checkbox"
               checked={sameAsPhone}
               onChange={handleSameAsPhoneToggle}
-              className="rounded bg-stone-100 border-stone-300 text-[#ff3366] focus:ring-0"
+              className="rounded-[4px] border-[#E5E5E5] text-[#DC2626] focus:ring-0 focus:ring-offset-0"
             />
             <span className="font-medium">Same as mobile</span>
           </label>
@@ -243,21 +250,25 @@ export default function CheckoutForm() {
             onChange={handleChange}
             disabled={sameAsPhone}
             placeholder="10-digit WhatsApp number"
-            className={`w-full bg-[#F5F5F3] border ${errors.buyer_whatsapp ? 'border-rose-500' : 'border-stone-200'} ${sameAsPhone ? 'opacity-70 bg-stone-100/60' : ''} rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#111111] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#ff3366] transition-all`}
+            className="sf-input pl-10"
+            style={{
+              borderColor: errors.buyer_whatsapp ? '#DC2626' : undefined,
+              opacity: sameAsPhone ? 0.6 : 1
+            }}
           />
-          <MessageSquare className="w-4 h-4 text-emerald-600 absolute left-3.5 top-3.5" />
+          <ChatCircle size={16} className="text-[#6B6B6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
         {errors.buyer_whatsapp && (
-          <p className="text-rose-600 text-xs mt-1.5 flex items-center gap-1 font-medium">
-            <AlertCircle className="w-3.5 h-3.5" /> {errors.buyer_whatsapp}
+          <p className="text-[#DC2626] text-xs mt-1.5 flex items-center gap-1 font-medium">
+            <Warning size={14} /> {errors.buyer_whatsapp}
           </p>
         )}
       </div>
 
-      {/* Shipping Address */}
+      {/* Delivery Address */}
       <div>
-        <label className="block text-xs font-bold text-[#111111] mb-1.5">
-          Delivery Address (House/Flat No, Street, City, State & PIN code) <span className="text-rose-500">*</span>
+        <label className="block text-sm font-semibold text-[#111111] mb-1.5">
+          Delivery Address <span className="text-[#DC2626]">*</span>
         </label>
         <div className="relative">
           <textarea
@@ -266,34 +277,35 @@ export default function CheckoutForm() {
             value={formData.buyer_address}
             onChange={handleChange}
             placeholder="Flat/House No, Street, City, State, PIN code"
-            className={`w-full bg-[#F5F5F3] border ${errors.buyer_address ? 'border-rose-500' : 'border-stone-200'} rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#111111] placeholder-stone-400 focus:outline-none focus:bg-white focus:border-[#ff3366] transition-all`}
+            className="sf-textarea pl-10"
+            style={{ borderColor: errors.buyer_address ? '#DC2626' : undefined }}
           />
-          <MapPin className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+          <MapPin size={16} className="text-[#6B6B6B] absolute left-3.5 top-3.5 pointer-events-none" />
         </div>
         {errors.buyer_address && (
-          <p className="text-rose-600 text-xs mt-1.5 flex items-center gap-1 font-medium">
-            <AlertCircle className="w-3.5 h-3.5" /> {errors.buyer_address}
+          <p className="text-[#DC2626] text-xs mt-1.5 flex items-center gap-1 font-medium">
+            <Warning size={14} /> {errors.buyer_address}
           </p>
         )}
       </div>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#ff3366] via-rose-600 to-[#8b5cf6] hover:opacity-95 text-white font-bold text-base tracking-wide shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+        className="sf-btn-primary w-full gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
           <span>Processing Order...</span>
         ) : (
           <>
-            <ShieldCheck className="w-5 h-5" />
-            <span>Place Order & Request UPI QR</span>
+            <ShieldCheck size={20} />
+            <span>Place Order &amp; Request UPI QR</span>
           </>
         )}
       </button>
 
-      <p className="text-center text-[11px] text-[#6B6B6B]">
+      <p className="text-xs text-[#6B6B6B] text-center">
         By placing this order, you agree to receive payment verification details on WhatsApp.
       </p>
 

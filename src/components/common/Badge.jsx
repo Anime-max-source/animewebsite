@@ -1,9 +1,15 @@
 import React from 'react'
 
+/**
+ * StockBadge — used on storefront ProductCard & ProductDetail.
+ * Kinetic Editorial styling: 12px radius, #E5E5E5 border, no pill shapes.
+ * Also used by admin pages (OrderStatusBadge is admin-safe since it was already
+ * admin-styled with coloured backgrounds).
+ */
 export function StockBadge({ inStock, stock }) {
   if (!inStock || stock <= 0) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 tracking-wide uppercase">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-[12px] text-xs font-semibold bg-white border border-[#E5E5E5] text-[#111111] font-['Inter']">
         Sold Out
       </span>
     )
@@ -11,19 +17,23 @@ export function StockBadge({ inStock, stock }) {
 
   if (stock && stock <= 5) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-[12px] text-xs font-semibold bg-white border border-[#E5E5E5] text-[#6B6B6B] font-['Inter']">
         Only {stock} Left
       </span>
     )
   }
 
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-[12px] text-xs font-semibold bg-white border border-[#E5E5E5] text-[#111111] font-['Inter']">
       In Stock
     </span>
   )
 }
 
+/**
+ * OrderStatusBadge — used in Admin panel and Order Confirmation.
+ * Kept with coloured backgrounds (admin uses this too).
+ */
 export function OrderStatusBadge({ status }) {
   const statusConfig = {
     pending: {
@@ -63,18 +73,13 @@ export function OrderStatusBadge({ status }) {
   )
 }
 
+/**
+ * CategoryBadge — used on storefront ProductCard & ProductDetail.
+ * Kinetic Editorial: 12px radius, neutral palette per DESIGN.md.
+ */
 export function CategoryBadge({ category }) {
-  const categoryColors = {
-    figures: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
-    clothing: 'bg-blue-50 text-blue-700 border-blue-200',
-    posters: 'bg-rose-50 text-rose-700 border-rose-200',
-    accessories: 'bg-amber-50 text-amber-700 border-amber-200'
-  }
-
-  const style = categoryColors[category?.toLowerCase()] || 'bg-gray-100 text-gray-700 border-gray-200'
-
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase border ${style}`}>
+    <span className="inline-flex items-center px-2 py-0.5 rounded-[12px] text-[10px] font-semibold tracking-wider uppercase border border-[#E5E5E5] bg-white text-[#6B6B6B] font-['Inter']">
       {category}
     </span>
   )

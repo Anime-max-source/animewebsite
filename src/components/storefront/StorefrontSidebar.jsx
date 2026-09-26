@@ -1,23 +1,24 @@
 import React, { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { 
-  Flame, 
-  Sparkles, 
-  Box, 
-  Image as ImageIcon, 
-  Shirt, 
-  Gem, 
-  Plus, 
-  LogOut, 
-  LogIn, 
-  ChevronRight, 
-  X, 
-  Check, 
+import {
+  Fire,
+  Sparkle,
+  Cube,
+  Image as PhImage,
+  TShirt,
+  Diamond,
+  Plus,
+  SignOut,
+  SignIn,
+  CaretRight,
+  X,
+  Check,
   Package,
   Bell
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { useApp } from '../../context/AppContext'
 import { formatPrice } from '../../utils/formatPrice'
+import AnimaxLogo from './AnimaxLogo'
 
 export default function StorefrontSidebar() {
   const { mockUser, setMockUser, logout, orders, products } = useApp()
@@ -54,14 +55,14 @@ export default function StorefrontSidebar() {
     setModalType(null)
   }
 
-  // Categories config
+  // Categories config — Phosphor icons (24px)
   const navCategories = [
-    { name: 'Popular Products', query: 'category=figures', icon: Flame },
-    { name: 'Explore New', query: '', icon: Sparkles, isExplore: true },
-    { name: 'Figures & Statues', query: 'category=figures', icon: Box },
-    { name: 'Posters & Wall Art', query: 'category=posters', icon: ImageIcon },
-    { name: 'Apparel', query: 'category=clothing', icon: Shirt },
-    { name: 'Accessories', query: 'category=accessories', icon: Gem },
+    { name: 'Popular Products', query: 'category=figures', icon: Fire },
+    { name: 'Explore New', query: '', icon: Sparkle, isExplore: true },
+    { name: 'Figures & Statues', query: 'category=figures', icon: Cube },
+    { name: 'Posters & Wall Art', query: 'category=posters', icon: PhImage },
+    { name: 'Apparel', query: 'category=clothing', icon: TShirt },
+    { name: 'Accessories', query: 'category=accessories', icon: Diamond },
   ]
 
   const currentSearch = location.search
@@ -73,170 +74,163 @@ export default function StorefrontSidebar() {
     return currentSearch.includes(cat.query)
   }
 
-  // Filter 1-2 recent orders for signed-in buyers
   const recentOrders = (orders || []).slice(0, 2)
   const isBuyerSignedIn = mockUser && mockUser.role !== 'guest'
 
   return (
     <>
-      <aside className="w-64 xl:w-72 flex-shrink-0">
-        <div className="sticky top-6 bg-white rounded-3xl p-6 shadow-sm border border-black/5 flex flex-col justify-between h-[calc(100vh-3rem)] overflow-y-auto scrollbar-none">
-          
-          {/* Top Section: Logo & Category Navigation */}
-          <div className="space-y-6">
-            
-            {/* Logo / Wordmark */}
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-2xl bg-[#111111] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-                <Flame className="w-5 h-5 text-rose-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-black tracking-tight text-[#111111] font-display">
-                  AnimeMax
-                </h1>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-[#6B6B6B]">
-                  Tokyo Merch Store
-                </span>
-              </div>
-            </Link>
+      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+      <aside className="w-full lg:w-56 xl:w-64 flex-shrink-0 lg:pr-6">
+        <div
+          className="sticky top-6 flex flex-col gap-6"
+          style={{ height: 'calc(100vh - 3rem)', overflowY: 'auto' }}
+        >
 
-            {/* Category Navigation */}
-            <nav className="space-y-1">
-              {navCategories.map((cat) => {
-                const active = isCatActive(cat)
-                const IconComponent = cat.icon
+          {/* Logo */}
+          <Link to="/" className="flex items-center" aria-label="AnimeMax home">
+            <AnimaxLogo className="h-8" />
+          </Link>
 
-                return (
-                  <Link
-                    key={cat.name}
-                    to={cat.query ? `/?${cat.query}` : '/'}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
-                      active
-                        ? 'bg-[#111111] text-white shadow-sm'
-                        : 'text-[#6B6B6B] hover:text-[#111111] hover:bg-black/5'
-                    }`}
-                  >
-                    <IconComponent className={`w-4 h-4 ${active ? 'text-white' : 'text-[#6B6B6B]'}`} />
-                    <span className="truncate">{cat.name}</span>
-                  </Link>
-                )
-              })}
-            </nav>
+          {/* ── Category Navigation ────────────────────────────────────── */}
+          <nav className="flex flex-col gap-0.5">
+            {navCategories.map((cat) => {
+              const active = isCatActive(cat)
+              const IconComponent = cat.icon
 
-            {/* Divider */}
-            <div className="border-t border-gray-100" />
-
-            {/* Quick Actions Mini-Section */}
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B6B6B] mb-2 px-2">
-                Quick Actions
-              </p>
-              <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => setModalType('request')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#111111] hover:bg-black/5 transition-colors text-left group"
+              return (
+                <Link
+                  key={cat.name}
+                  to={cat.query ? `/?${cat.query}` : '/'}
+                  className={[
+                    'flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm font-medium transition-colors',
+                    active
+                      ? 'bg-[#111111] text-white'
+                      : 'text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6]'
+                  ].join(' ')}
                 >
-                  <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">
-                    <Plus className="w-3 h-3" />
-                  </div>
-                  <span>Request a product</span>
-                </button>
+                  <IconComponent
+                    size={20}
+                    weight={active ? 'bold' : 'regular'}
+                    className={active ? 'text-white' : 'text-[#6B6B6B]'}
+                  />
+                  <span className="truncate font-['Inter']">{cat.name}</span>
+                </Link>
+              )
+            })}
+          </nav>
 
-                <button
-                  type="button"
-                  onClick={() => setModalType('restock')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-[#111111] hover:bg-black/5 transition-colors text-left group"
-                >
-                  <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[#111111] group-hover:bg-[#111111] group-hover:text-white transition-colors">
-                    <Bell className="w-3 h-3" />
-                  </div>
-                  <span>Notify me on restock</span>
-                </button>
-              </div>
+          {/* Divider */}
+          <div className="border-t border-[#E5E5E5]" />
+
+          {/* ── Quick Actions ──────────────────────────────────────────── */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#6B6B6B] mb-2 px-1 font-['Inter']">
+              Quick Actions
+            </p>
+            <div className="flex flex-col gap-0.5">
+              <button
+                type="button"
+                onClick={() => setModalType('request')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm font-medium text-[#111111] hover:bg-[#F8F8F6] transition-colors text-left font-['Inter']"
+              >
+                <Plus size={20} className="text-[#6B6B6B] flex-shrink-0" />
+                <span>Request a product</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setModalType('restock')}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm font-medium text-[#111111] hover:bg-[#F8F8F6] transition-colors text-left font-['Inter']"
+              >
+                <Bell size={20} className="text-[#6B6B6B] flex-shrink-0" />
+                <span>Notify me on restock</span>
+              </button>
             </div>
+          </div>
 
-            {/* Divider */}
-            <div className="border-t border-gray-100" />
+          {/* Divider */}
+          <div className="border-t border-[#E5E5E5]" />
 
-            {/* Recent Orders Mini-List (If Buyer is signed in) */}
-            <div>
-              <div className="flex items-center justify-between mb-2 px-2">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B6B6B]">
-                  Recent Orders
-                </p>
-                {isBuyerSignedIn && recentOrders.length > 0 && (
-                  <Link to="/orders" className="text-[11px] text-[#111111] hover:underline font-semibold">
-                    See all
-                  </Link>
-                )}
-              </div>
-
-              {isBuyerSignedIn ? (
-                recentOrders.length > 0 ? (
-                  <div className="space-y-2.5">
-                    {recentOrders.map((order) => (
-                      <div 
-                        key={order.id} 
-                        className="p-2.5 rounded-2xl bg-[#E3EFE1]/40 border border-black/5 flex items-center gap-2.5"
-                      >
-                        <div className="w-10 h-10 rounded-xl bg-white overflow-hidden border border-black/5 flex-shrink-0 flex items-center justify-center">
-                          {order.order_items?.[0]?.product?.image_url ? (
-                            <img 
-                              src={order.order_items[0].product.image_url} 
-                              alt="order thumb" 
-                              className="w-full h-full object-cover" 
-                            />
-                          ) : (
-                            <Package className="w-5 h-5 text-gray-400" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-[#111111] truncate">
-                            Order #{order.id.slice(0, 6)}
-                          </p>
-                          <p className="text-[10px] text-[#6B6B6B]">
-                            {formatPrice(order.total_amount)} · {order.status}
-                          </p>
-                        </div>
-                        <Link 
-                          to={`/order-confirmation/${order.id}`}
-                          className="text-[10px] font-semibold text-[#111111] bg-white px-2 py-1 rounded-full border border-black/10 hover:bg-gray-50 flex items-center"
-                          title="View order details"
-                        >
-                          View
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-[#6B6B6B] px-2 italic">
-                    No orders placed yet.
-                  </p>
-                )
-              ) : (
-                <div className="p-3 rounded-2xl bg-gray-50 text-center">
-                  <p className="text-xs text-[#6B6B6B] mb-2">
-                    Sign in to track orders
-                  </p>
-                  <Link
-                    to="/signin"
-                    className="inline-block px-3 py-1 rounded-full bg-[#111111] text-white text-[11px] font-medium hover:bg-black transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                </div>
+          {/* ── Recent Orders ──────────────────────────────────────────── */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-[#6B6B6B] font-['Inter']">
+                Recent Orders
+              </p>
+              {isBuyerSignedIn && recentOrders.length > 0 && (
+                <Link
+                  to="/orders"
+                  className="text-[11px] text-[#DC2626] hover:underline font-semibold font-['Inter']"
+                >
+                  See all
+                </Link>
               )}
             </div>
 
+            {isBuyerSignedIn ? (
+              recentOrders.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  {recentOrders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="p-2.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center gap-2.5"
+                    >
+                      <div className="w-9 h-9 rounded-[12px] bg-white border border-[#E5E5E5] flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        {order.order_items?.[0]?.product?.image_url ? (
+                          <img
+                            src={order.order_items[0].product.image_url}
+                            alt="order thumb"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Package size={20} className="text-[#6B6B6B]" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-[#111111] truncate font-['Inter']">
+                          Order #{order.id.slice(0, 6)}
+                        </p>
+                        <p className="text-[10px] text-[#6B6B6B] font-['Inter']">
+                          {formatPrice(order.total_amount)} · {order.status}
+                        </p>
+                      </div>
+                      <Link
+                        to={`/order-confirmation/${order.id}`}
+                        className="text-[10px] font-semibold text-[#111111] bg-white px-2 py-1 rounded-[12px] border border-[#E5E5E5] hover:bg-[#F8F8F6] flex items-center font-['Inter']"
+                        title="View order details"
+                      >
+                        View
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-[#6B6B6B] px-1 font-['Inter']">
+                  No orders placed yet.
+                </p>
+              )
+            ) : (
+              <div className="p-4 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] text-center">
+                <p className="text-xs text-[#6B6B6B] mb-3 font-['Inter']">
+                  Sign in to track orders
+                </p>
+                <Link
+                  to="/signin"
+                  className="sf-btn-primary text-xs h-8 px-4 rounded-[12px]"
+                  style={{ height: '32px', minHeight: 'unset' }}
+                >
+                  Sign In
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* Bottom Section: Auth / Account Status */}
-          <div className="pt-4 border-t border-gray-100">
+          {/* ── Bottom: Auth / Account ─────────────────────────────────── */}
+          <div className="pt-4 border-t border-[#E5E5E5]">
             {isBuyerSignedIn ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-[#111111] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 overflow-hidden border border-black/10">
+                  <div className="w-8 h-8 rounded-[12px] bg-[#111111] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 overflow-hidden border border-[#E5E5E5] font-['Inter']">
                     {mockUser.imageUrl ? (
                       <img src={mockUser.imageUrl} alt={mockUser.fullName || 'User'} className="w-full h-full object-cover" />
                     ) : (
@@ -244,8 +238,8 @@ export default function StorefrontSidebar() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-[#111111] truncate">{mockUser.fullName}</p>
-                    <p className="text-[10px] text-[#6B6B6B] truncate">Signed In</p>
+                    <p className="text-xs font-semibold text-[#111111] truncate font-['Inter']">{mockUser.fullName}</p>
+                    <p className="text-[10px] text-[#6B6B6B] font-['Inter']">Signed In</p>
                   </div>
                 </div>
                 <button
@@ -254,18 +248,18 @@ export default function StorefrontSidebar() {
                     await logout()
                     showToast('Logged out of buyer account')
                   }}
-                  className="p-2 rounded-xl text-[#6B6B6B] hover:text-[#111111] hover:bg-black/5 transition-colors"
+                  className="p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
                   title="Log out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <SignOut size={20} />
                 </button>
               </div>
             ) : (
               <Link
                 to="/signin"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-black/5 hover:bg-black/10 text-xs font-semibold text-[#111111] transition-colors"
+                className="flex items-center gap-2 w-full py-2.5 px-3 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] hover:bg-[#F1F1EE] text-sm font-medium text-[#111111] transition-colors font-['Inter']"
               >
-                <LogIn className="w-3.5 h-3.5" />
+                <SignIn size={20} className="text-[#6B6B6B]" />
                 <span>Sign in to Account</span>
               </Link>
             )}
@@ -274,64 +268,65 @@ export default function StorefrontSidebar() {
         </div>
       </aside>
 
-      {/* Toast Notification */}
+      {/* ── Toast Notification ─────────────────────────────────────────── */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#111111] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-medium animate-in fade-in slide-in-from-bottom-3">
-          <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 bg-[#111111] text-white px-5 py-3 rounded-[12px] border border-[#333] flex items-center gap-3 text-sm font-medium sf-animate-slide-up font-['Inter']">
+          <Check size={16} className="text-[#DC2626] flex-shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Quick Action Modal: Request a Product */}
+      {/* ── Modal: Request a Product ───────────────────────────────────── */}
       {modalType === 'request' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-black/5 relative animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in" style={{ background: 'rgba(17,17,17,0.4)' }}>
+          <div className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-md w-full p-6 relative sf-animate-slide-up">
             <button
               onClick={() => setModalType(null)}
-              className="absolute top-5 right-5 p-1.5 rounded-full text-gray-400 hover:text-black hover:bg-gray-100"
+              className="absolute top-4 right-4 p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X size={20} />
             </button>
-            <div className="w-10 h-10 rounded-2xl bg-[#E3EFE1] flex items-center justify-center text-[#111111] mb-4">
-              <Plus className="w-5 h-5" />
+
+            <div className="w-10 h-10 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center justify-center mb-4">
+              <Plus size={24} className="text-[#111111]" />
             </div>
-            <h3 className="text-lg font-bold text-[#111111]">Request an Anime Product</h3>
-            <p className="text-xs text-[#6B6B6B] mt-1 mb-4">
-              Can't find your favorite figure or hoodie? Tell us what you're looking for and our Japan team will source it for you!
+            <h3 className="text-xl font-bold text-[#111111] font-['Syne']">Request an Anime Product</h3>
+            <p className="text-sm text-[#6B6B6B] mt-1 mb-5 font-['Inter']">
+              Can't find your favorite figure or hoodie? Tell us what you're looking for and our Japan team will source it.
             </p>
-            <form onSubmit={handleRequestSubmit} className="space-y-3">
+            <form onSubmit={handleRequestSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#111111] mb-1">Product Name / Character</label>
+                <label className="block text-sm font-semibold text-[#111111] mb-1.5 font-['Inter']">Product Name / Character</label>
                 <input
                   type="text"
                   required
                   placeholder="Item or figure name..."
                   value={requestItemName}
                   onChange={(e) => setRequestItemName(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#111111] focus:outline-none focus:border-black"
+                  className="sf-input"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#111111] mb-1">Anime Series (Optional)</label>
+                <label className="block text-sm font-semibold text-[#111111] mb-1.5 font-['Inter']">Anime Series (Optional)</label>
                 <input
                   type="text"
                   placeholder="Anime series or franchise..."
                   value={requestAnime}
                   onChange={(e) => setRequestAnime(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#111111] focus:outline-none focus:border-black"
+                  className="sf-input"
                 />
               </div>
-              <div className="pt-2 flex gap-2">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalType(null)}
-                  className="flex-1 py-2.5 rounded-full border border-gray-200 text-xs font-semibold text-[#6B6B6B] hover:bg-gray-50"
+                  className="sf-btn-secondary flex-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-full bg-[#111111] hover:bg-black text-xs font-semibold text-white shadow-sm"
+                  className="sf-btn-primary flex-1"
                 >
                   Submit Request
                 </button>
@@ -341,30 +336,32 @@ export default function StorefrontSidebar() {
         </div>
       )}
 
-      {/* Quick Action Modal: Notify on Restock */}
+      {/* ── Modal: Notify on Restock ───────────────────────────────────── */}
       {modalType === 'restock' && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-black/5 relative animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in" style={{ background: 'rgba(17,17,17,0.4)' }}>
+          <div className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-md w-full p-6 relative sf-animate-slide-up">
             <button
               onClick={() => setModalType(null)}
-              className="absolute top-5 right-5 p-1.5 rounded-full text-gray-400 hover:text-black hover:bg-gray-100"
+              className="absolute top-4 right-4 p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X size={20} />
             </button>
-            <div className="w-10 h-10 rounded-2xl bg-[#F5E7A8] flex items-center justify-center text-[#111111] mb-4">
-              <Bell className="w-5 h-5" />
+
+            <div className="w-10 h-10 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center justify-center mb-4">
+              <Bell size={24} className="text-[#111111]" />
             </div>
-            <h3 className="text-lg font-bold text-[#111111]">Get Restock Notification</h3>
-            <p className="text-xs text-[#6B6B6B] mt-1 mb-4">
+            <h3 className="text-xl font-bold text-[#111111] font-['Syne']">Get Restock Notification</h3>
+            <p className="text-sm text-[#6B6B6B] mt-1 mb-5 font-['Inter']">
               Enter your email or WhatsApp number and we will ping you as soon as sold-out stock arrives.
             </p>
-            <form onSubmit={handleRestockSubmit} className="space-y-3">
+            <form onSubmit={handleRestockSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#111111] mb-1">Select Item</label>
+                <label className="block text-sm font-semibold text-[#111111] mb-1.5 font-['Inter']">Select Item</label>
                 <select
                   value={selectedRestockProduct}
                   onChange={(e) => setSelectedRestockProduct(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#111111] focus:outline-none focus:border-black"
+                  className="sf-input"
+                  style={{ height: '48px' }}
                 >
                   <option value="">All Upcoming Restocks</option>
                   {(products || []).map((p) => (
@@ -373,27 +370,27 @@ export default function StorefrontSidebar() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#111111] mb-1">Email or Phone Number</label>
+                <label className="block text-sm font-semibold text-[#111111] mb-1.5 font-['Inter']">Email or WhatsApp Number</label>
                 <input
                   type="text"
                   required
                   placeholder="Email address or WhatsApp number..."
                   value={restockEmail}
                   onChange={(e) => setRestockEmail(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#111111] focus:outline-none focus:border-black"
+                  className="sf-input"
                 />
               </div>
-              <div className="pt-2 flex gap-2">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setModalType(null)}
-                  className="flex-1 py-2.5 rounded-full border border-gray-200 text-xs font-semibold text-[#6B6B6B] hover:bg-gray-50"
+                  className="sf-btn-secondary flex-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-full bg-[#111111] hover:bg-black text-xs font-semibold text-white shadow-sm"
+                  className="sf-btn-primary flex-1"
                 >
                   Set Alert
                 </button>
