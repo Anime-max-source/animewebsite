@@ -4,6 +4,7 @@ import { ShoppingCart, Eye, Check } from 'lucide-react'
 import { formatPrice } from '../../utils/formatPrice'
 import { StockBadge, CategoryBadge } from '../common/Badge'
 import { useCart } from '../../context/CartContext'
+import { handleImageError } from '../../utils/imageFallback'
 
 export default function ProductCard({ product }) {
   const { addToCart, items } = useCart()
@@ -28,6 +29,7 @@ export default function ProductCard({ product }) {
           src={product.image_url}
           alt={product.name}
           loading="lazy"
+          onError={handleImageError}
           className={`w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 ${isSoldOut ? 'grayscale-[40%]' : ''}`}
         />
 

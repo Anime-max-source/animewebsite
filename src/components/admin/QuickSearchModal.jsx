@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search, ShoppingBag, Package, Users, X, ArrowRight, ExternalLink } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { formatPrice } from '../../utils/formatPrice'
+import { handleImageError } from '../../utils/imageFallback'
 
 export default function QuickSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('')
@@ -156,6 +157,7 @@ export default function QuickSearchModal({ isOpen, onClose }) {
                           <img
                             src={p.image_url}
                             alt={p.name}
+                            onError={handleImageError}
                             className="w-9 h-9 rounded-lg object-cover bg-gray-100 border border-gray-200 shrink-0"
                           />
                           <div className="min-w-0">

@@ -3,6 +3,7 @@ import { Edit2, Trash2, Power, Eye, CheckCircle2, XCircle } from 'lucide-react'
 import { formatPrice } from '../../utils/formatPrice'
 import { CategoryBadge, StockBadge } from '../common/Badge'
 import Modal from '../common/Modal'
+import { handleImageError } from '../../utils/imageFallback'
 
 export default function ProductTable({ products, onEdit, onDelete, onToggleSoldOut }) {
   const [deleteCandidate, setDeleteCandidate] = useState(null)
@@ -39,6 +40,7 @@ export default function ProductTable({ products, onEdit, onDelete, onToggleSoldO
                       <img
                         src={product.image_url}
                         alt={product.name}
+                        onError={handleImageError}
                         className="w-10 h-10 rounded-lg object-cover bg-gray-100 border border-[#EDEDED] shrink-0"
                       />
                       <div className="max-w-xs">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldAlert } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
+import { handleImageError } from '../../utils/imageFallback'
 
 export default function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart()
@@ -74,6 +75,7 @@ export default function CartDrawer() {
                   <img
                     src={item.image_url}
                     alt={item.name}
+                    onError={handleImageError}
                     className="w-16 h-20 rounded-xl object-cover bg-slate-100 border border-black/5 flex-shrink-0"
                   />
 

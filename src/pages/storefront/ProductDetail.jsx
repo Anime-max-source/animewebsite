@@ -17,6 +17,7 @@ import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
 import { StockBadge, CategoryBadge } from '../../components/common/Badge'
 import ProductCard from '../../components/storefront/ProductCard'
+import { handleImageError } from '../../utils/imageFallback'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -98,6 +99,7 @@ export default function ProductDetail() {
             <img
               src={product.image_url}
               alt={product.name}
+              onError={handleImageError}
               className={`w-full h-full object-cover object-center ${isSoldOut ? 'grayscale-[30%]' : ''}`}
             />
             {isSoldOut && (
