@@ -188,7 +188,7 @@ export default function Account() {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Street, locality, city, state and PIN code"
-                  className="sf-textarea pl-10"
+                  className="sf-textarea pl-10 pt-3"
                 />
                 <MapPin size={16} className="text-[#6B6B6B] absolute left-3.5 top-3.5 pointer-events-none" />
               </div>

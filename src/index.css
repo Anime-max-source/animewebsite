@@ -229,7 +229,8 @@
   background: #FFFFFF;
   border: 1px solid var(--sf-border);
   border-radius: var(--sf-radius);
-  padding: 0 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   font-family: var(--sf-font-body);
   font-size: 14px;
   color: #111111;
@@ -258,6 +259,42 @@
 }
 [data-theme="storefront"] .sf-textarea:focus {
   border-color: #DC2626;
+}
+
+/* Ensure padding utility classes override defaults when an icon or badge is inside */
+[data-theme="storefront"] .sf-input.pl-9,
+[data-theme="storefront"] input.sf-input.pl-9 {
+  padding-left: 2.25rem !important; /* 36px */
+}
+[data-theme="storefront"] .sf-input.pl-10,
+[data-theme="storefront"] input.sf-input.pl-10,
+[data-theme="storefront"] .sf-textarea.pl-10,
+[data-theme="storefront"] textarea.sf-textarea.pl-10 {
+  padding-left: 2.5rem !important; /* 40px */
+}
+[data-theme="storefront"] .sf-input.pl-11,
+[data-theme="storefront"] input.sf-input.pl-11,
+[data-theme="storefront"] .sf-textarea.pl-11,
+[data-theme="storefront"] textarea.sf-textarea.pl-11 {
+  padding-left: 2.75rem !important; /* 44px */
+}
+[data-theme="storefront"] .sf-input.pl-12,
+[data-theme="storefront"] input.sf-input.pl-12,
+[data-theme="storefront"] .sf-textarea.pl-12,
+[data-theme="storefront"] textarea.sf-textarea.pl-12 {
+  padding-left: 3rem !important; /* 48px */
+}
+[data-theme="storefront"] .sf-input.pr-8,
+[data-theme="storefront"] input.sf-input.pr-8 {
+  padding-right: 2rem !important; /* 32px */
+}
+[data-theme="storefront"] .sf-input.pr-10,
+[data-theme="storefront"] input.sf-input.pr-10 {
+  padding-right: 2.5rem !important; /* 40px */
+}
+[data-theme="storefront"] .sf-input.pr-12,
+[data-theme="storefront"] input.sf-input.pr-12 {
+  padding-right: 3rem !important; /* 48px */
 }
 
 /* ─── Storefront Product Card ────────────────────────────────────────────── */

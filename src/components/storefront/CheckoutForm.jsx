@@ -277,7 +277,7 @@ export default function CheckoutForm() {
             value={formData.buyer_address}
             onChange={handleChange}
             placeholder="Flat/House No, Street, City, State, PIN code"
-            className="sf-textarea pl-10"
+            className="sf-textarea pl-10 pt-3"
             style={{ borderColor: errors.buyer_address ? '#DC2626' : undefined }}
           />
           <MapPin size={16} className="text-[#6B6B6B] absolute left-3.5 top-3.5 pointer-events-none" />
