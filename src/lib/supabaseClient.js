@@ -10,29 +10,77 @@ export const isSupabaseConfigured = Boolean(
   supabaseUrl.startsWith('https://')
 )
 
-// Default unauthenticated / public client
-export const supabase = isSupabaseConfigured 
-  ? createClient(supabaseUrl, supabaseAnonKey) 
-  : null
+let clerkTokenGetter = null
 
 /**
- * Creates an authenticated Supabase client that injects Clerk's JWT
- * for Supabase Row Level Security (RLS) enforcement.
- * @param {Function} getClerkToken - function returning Clerk JWT session token
+ * Register Clerk's getToken function (called by ClerkAuthSync)
+ * so every Supabase operation automatically includes the signed-in user/owner JWT.
+ * @param {Function|null} getter 
  */
-export function getAuthenticatedSupabase(getClerkToken) {
-  if (!isSupabaseConfigured) return null
+export function setClerkTokenGetter(getter) {
+  clerkTokenGetter = getter
+}
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: async () => {
-        try {
-          const token = await getClerkToken({ template: 'supabase' })
+export function getClerkTokenGetter() {
+  return clerkTokenGetter
+}
+
+async function resolveClerkToken(getter) {
+  if (typeof getter !== 'function') return null
+  try {
+    // 1. First attempt: standard Clerk third-party template named 'supabase'
+    const token = await getter({ template: 'supabase' })
+    if (token) return token
+  } catch (err) {
+    // Template 'supabase' may not be configured in Clerk Dashboard; fall back to session token
+  }
+
+  try {
+    // 2. Fallback: Clerk session JWT
+    const fallbackToken = await getter()
+    if (fallbackToken) return fallbackToken
+  } catch (err) {
+    console.warn('Failed to retrieve Clerk session token:', err)
+  }
+
+  return null
+}
+
+// Supabase client instance with dynamic third-party auth wiring for Storefront and Admin
+export const supabase = isSupabaseConfigured 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      accessToken: async () => {
+        return await resolveClerkToken(clerkTokenGetter)
+      },
+      global: {
+        headers: async () => {
+          const token = await resolveClerkToken(clerkTokenGetter)
           if (token) {
             return { Authorization: `Bearer ${token}` }
           }
-        } catch (err) {
-          console.warn('Failed to retrieve Clerk Supabase JWT:', err)
+          return {}
+        }
+      }
+    })
+  : null
+
+/**
+ * Creates an authenticated Supabase client using an explicit or registered token getter.
+ * @param {Function} [customGetter] - optional function returning Clerk JWT
+ */
+export function getAuthenticatedSupabase(customGetter) {
+  if (!isSupabaseConfigured) return null
+  const getter = customGetter || clerkTokenGetter
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    accessToken: async () => {
+      return await resolveClerkToken(getter)
+    },
+    global: {
+      headers: async () => {
+        const token = await resolveClerkToken(getter)
+        if (token) {
+          return { Authorization: `Bearer ${token}` }
         }
         return {}
       }

@@ -168,6 +168,13 @@ export function AppProvider({ children }) {
     }
   }, [mockUser])
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.__setMockUser = setMockUser
+      window.__mockUser = mockUser
+    }
+  }, [mockUser, setMockUser])
+
   // Sync to local storage
   useEffect(() => {
     try {
@@ -238,8 +245,8 @@ export function AppProvider({ children }) {
 
       if (!ordErr && remoteOrders) {
         setOrders(prev => {
-          const remoteIds = new Set(remoteOrders.map(o => o.id))
-          const localOnly = prev.filter(o => !remoteIds.has(o.id))
+          const remoteIds = new Set(remoteOrders.map(o => String(o.id)))
+          const localOnly = prev.filter(o => !remoteIds.has(String(o.id)))
           return [...remoteOrders, ...localOnly]
         })
       } else if (ordErr) {
@@ -422,9 +429,23 @@ export function AppProvider({ children }) {
     setProducts(prev => prev.filter(p => p.id !== id))
   }
 
+  // Helper to ensure valid RFC4122 v4 UUID for Supabase
+  const generateUUID = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      try {
+        return crypto.randomUUID()
+      } catch {}
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0
+      const v = c === 'x' ? r : (r & 0x3) | 0x8
+      return v.toString(16)
+    })
+  }
+
   // Order Operations
   const createOrder = async (orderData) => {
-    const newOrderId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'ord-' + Math.floor(1000 + Math.random() * 9000)
+    const newOrderId = generateUUID()
     const newOrder = {
       id: newOrderId,
       status: 'pending',
@@ -462,17 +483,29 @@ export function AppProvider({ children }) {
   }
 
   const updateOrderStatus = async (orderId, newStatus) => {
+    // 1. Immediately update React state immutably so order switches tabs instantly
+    setOrders(prev =>
+      prev.map(o => (String(o.id) === String(orderId) ? { ...o, status: newStatus } : o))
+    )
+
+    // 2. Persist update to Supabase
     if (isSupabaseConfigured && supabase) {
       try {
-        await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+        const { data, error } = await supabase
+          .from('orders')
+          .update({ status: newStatus })
+          .eq('id', orderId)
+          .select()
+
+        if (error) {
+          console.error(`[Supabase] Failed to update order #${orderId} status:`, error.message || error)
+        } else {
+          console.log(`[Supabase] Order #${orderId} status successfully updated to "${newStatus}"`)
+        }
       } catch (err) {
-        console.error(err)
+        console.error('[Supabase] updateOrderStatus exception:', err)
       }
     }
-
-    setOrders(prev =>
-      prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o))
-    )
   }
 
   // Buyer Profile Operations

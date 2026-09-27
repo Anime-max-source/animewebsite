@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import OrderTable from '../../components/admin/OrderTable'
 import { Search, MessageSquare, Clock, CheckCircle2, RefreshCw } from 'lucide-react'
@@ -24,24 +24,30 @@ export default function ManageOrders() {
     setTimeout(() => setIsRefreshing(false), 500)
   }
 
-  const filteredOrders = orders.filter((o) => {
-    const matchesStatus = statusFilter === 'all' || o.status === statusFilter
-    const matchesSearch =
-      !searchQuery ||
-      o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.buyer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.buyer_whatsapp.includes(searchQuery) ||
-      o.buyer_phone.includes(searchQuery)
-    return matchesStatus && matchesSearch
-  })
+  // Derive filtered orders reactively on every change to orders state or active tab
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const matchesStatus = statusFilter === 'all' || o.status === statusFilter
+      const q = searchQuery.toLowerCase().trim()
+      const matchesSearch =
+        !q ||
+        (o.id && String(o.id).toLowerCase().includes(q)) ||
+        (o.buyer_name && o.buyer_name.toLowerCase().includes(q)) ||
+        (o.buyer_whatsapp && String(o.buyer_whatsapp).includes(q)) ||
+        (o.buyer_phone && String(o.buyer_phone).includes(q))
+      return matchesStatus && matchesSearch
+    })
+  }, [orders, statusFilter, searchQuery])
 
-  const countByStatus = {
+  // Derive live tab badge counts directly from current orders state
+  const countByStatus = useMemo(() => ({
     all: orders.length,
     pending: orders.filter((o) => o.status === 'pending').length,
     qr_sent: orders.filter((o) => o.status === 'qr_sent').length,
     payment_confirmed: orders.filter((o) => o.status === 'payment_confirmed').length,
     shipped: orders.filter((o) => o.status === 'shipped').length,
-  }
+    cancelled: orders.filter((o) => o.status === 'cancelled').length,
+  }), [orders])
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto font-sans antialiased text-[#111827]">
@@ -85,9 +91,11 @@ export default function ManageOrders() {
             { id: 'qr_sent', label: 'QR Sent' },
             { id: 'payment_confirmed', label: 'Payment Verified' },
             { id: 'shipped', label: 'Shipped' },
+            { id: 'cancelled', label: 'Cancelled' },
           ].map((tab) => (
             <button
               key={tab.id}
+              data-tab={tab.id}
               onClick={() => setStatusFilter(tab.id)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
                 statusFilter === tab.id

@@ -117,14 +117,30 @@ export default function OrderTable({ orders, onUpdateStatus }) {
                     </select>
                   </td>
 
-                  {/* Quick WhatsApp & QR Link */}
+                  {/* Quick WhatsApp & QR Link & Status Actions */}
                   <td className="px-5 py-3.5 text-center">
                     <div className="flex items-center justify-center gap-1.5">
+                      {order.status !== 'shipped' ? (
+                        <button
+                          onClick={() => onUpdateStatus(order.id, 'shipped')}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 shadow-2xs transition-all"
+                          title="Quick mark order as Shipped"
+                        >
+                          <Truck className="w-3.5 h-3.5" />
+                          <span>Mark Shipped</span>
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle className="w-3 h-3" />
+                          <span>Dispatched</span>
+                        </span>
+                      )}
+
                       <a
                         href={generateWhatsAppMessage(order)}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-2xs transition-all"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-2xs transition-all"
                         title="Open WhatsApp with pre-filled order details & UPI request"
                       >
                         <MessageSquare className="w-3.5 h-3.5" />
@@ -223,8 +239,48 @@ export default function OrderTable({ orders, onUpdateStatus }) {
               <span className="text-base text-[#111827]">{formatPrice(inspectOrder.total_amount)}</span>
             </div>
 
+            {/* Quick Status Transition Buttons inside Modal */}
+            <div className="pt-2 border-t border-[#EDEDED] space-y-2">
+              <p className="font-bold text-[#111827] uppercase text-[11px] tracking-wider">
+                Update Fulfillment Status
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdateStatus(inspectOrder.id, 'payment_confirmed')
+                    setInspectOrder(prev => ({ ...prev, status: 'payment_confirmed' }))
+                  }}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
+                    inspectOrder.status === 'payment_confirmed'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                      : 'bg-white text-[#111827] border-[#EDEDED] hover:bg-gray-50'
+                  }`}
+                >
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Payment Verified</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdateStatus(inspectOrder.id, 'shipped')
+                    setInspectOrder(prev => ({ ...prev, status: 'shipped' }))
+                  }}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
+                    inspectOrder.status === 'shipped'
+                      ? 'bg-blue-50 text-blue-700 border-blue-300'
+                      : 'bg-white text-[#111827] border-[#EDEDED] hover:bg-gray-50'
+                  }`}
+                >
+                  <Truck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Mark as Shipped</span>
+                </button>
+              </div>
+            </div>
+
             {/* Quick WhatsApp Action */}
-            <div className="pt-2">
+            <div className="pt-1">
               <a
                 href={generateWhatsAppMessage(inspectOrder)}
                 target="_blank"

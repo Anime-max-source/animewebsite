@@ -141,7 +141,9 @@ create policy "Allow read access to orders"
     for select
     to public, anon, authenticated
     using (
-        (auth.jwt() ->> 'sub') = user_id
+        user_id = (auth.jwt() ->> 'sub')
+        OR (auth.jwt() ->> 'role') = 'owner'
+        OR (auth.jwt() -> 'public_metadata' ->> 'role') = 'owner'
         OR public.is_owner()
     );
 
@@ -149,9 +151,17 @@ create policy "Allow read access to orders"
 create policy "Allow update access to orders"
     on public.orders
     for update
-    to authenticated
-    using (public.is_owner())
-    with check (public.is_owner());
+    to public, anon, authenticated
+    using (
+        (auth.jwt() ->> 'role') = 'owner'
+        OR (auth.jwt() -> 'public_metadata' ->> 'role') = 'owner'
+        OR public.is_owner()
+    )
+    with check (
+        (auth.jwt() ->> 'role') = 'owner'
+        OR (auth.jwt() -> 'public_metadata' ->> 'role') = 'owner'
+        OR public.is_owner()
+    );
 
 -- ---------------------------------------------------------
 -- 4. HOMEPAGE BANNERS TABLE & POLICIES

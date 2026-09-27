@@ -1,24 +1,39 @@
 import React, { useEffect } from 'react'
-import { useUser, useClerk } from '@clerk/clerk-react'
+import { useUser, useClerk, useAuth } from '@clerk/clerk-react'
 import { useApp } from '../../context/AppContext'
 import { isOwnerUser } from '../../lib/clerkClient'
+import { setClerkTokenGetter } from '../../lib/supabaseClient'
 
 /**
  * ClerkAuthSync bridges Clerk's reactive authentication state
- * with AnimeMax's AppContext (mockUser, role, and profile details).
- * This ensures that as soon as a user signs in via Clerk, the entire
- * application immediately recognizes them as signed in.
+ * with AnimeMax's AppContext (mockUser, role, and profile details)
+ * and registers Clerk's JWT provider with Supabase client so all
+ * operations (especially Admin order queries and updates) have owner credentials.
  */
 export default function ClerkAuthSync() {
   const { user, isLoaded, isSignedIn } = useUser()
+  const { getToken } = useAuth()
   const clerk = useClerk()
-  const { setMockUser, registerLogoutHandler } = useApp()
+  const { setMockUser, registerLogoutHandler, refreshOrders } = useApp()
 
   useEffect(() => {
     if (clerk && registerLogoutHandler) {
       registerLogoutHandler(() => clerk.signOut())
     }
   }, [clerk, registerLogoutHandler])
+
+  // Dynamically wire Clerk JWT token getter to Supabase client
+  useEffect(() => {
+    if (isLoaded && isSignedIn && typeof getToken === 'function') {
+      setClerkTokenGetter(getToken)
+      // Sync fresh orders with the newly established authenticated token
+      if (refreshOrders) {
+        refreshOrders()
+      }
+    } else if (isLoaded && !isSignedIn) {
+      setClerkTokenGetter(null)
+    }
+  }, [isLoaded, isSignedIn, getToken, refreshOrders])
 
   useEffect(() => {
     if (!isLoaded) return
