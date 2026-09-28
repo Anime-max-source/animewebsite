@@ -12,6 +12,7 @@ import {
 } from '@phosphor-icons/react'
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, cartTotal, cartCount, clearCart } = useCart()
@@ -64,8 +65,9 @@ export default function Cart() {
             >
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <img
-                  src={item.image_url}
+                  src={cldUrl(item.image_url, { width: 160, height: 160, crop: 'fill' })}
                   alt={item.name}
+                  loading="lazy"
                   className="w-20 h-24 object-cover rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex-shrink-0"
                 />
                 <div>

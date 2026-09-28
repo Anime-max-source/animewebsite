@@ -4,6 +4,7 @@ import { Search, ShoppingBag, Package, Users, X, ArrowRight, ExternalLink } from
 import { useApp } from '../../context/AppContext'
 import { formatPrice } from '../../utils/formatPrice'
 import { handleImageError } from '../../utils/imageFallback'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function QuickSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('')
@@ -155,8 +156,9 @@ export default function QuickSearchModal({ isOpen, onClose }) {
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <img
-                            src={p.image_url}
+                            src={cldUrl(p.image_url, { width: 80, height: 80, crop: 'fill' })}
                             alt={p.name}
+                            loading="lazy"
                             onError={handleImageError}
                             className="w-9 h-9 rounded-lg object-cover bg-gray-100 border border-gray-200 shrink-0"
                           />

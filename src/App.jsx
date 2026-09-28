@@ -63,11 +63,29 @@ export default function App() {
            Storefront Layout: Kinetic Editorial Design System
            data-theme="storefront" scopes all CSS tokens to this subtree.
            ───────────────────────────────────────────────────────────────── */
-        <div data-theme="storefront" className="min-h-screen bg-[#FFFFFF] w-full overflow-x-hidden">
+        <div
+          data-theme="storefront"
+          className="bg-[#FFFFFF] w-full"
+          style={{
+            minHeight: '100dvh',
+            /* dvh fallback for browsers without dvh support */
+            /* @supports not (min-height: 100dvh) { min-height: 100vh } */
+            overflowX: 'hidden',
+            colorScheme: 'light',
+          }}
+        >
           {/* Global Slide-out Shopping Cart Drawer */}
           <CartDrawer />
 
-          <div className="flex min-h-screen max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div
+            className="flex max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8"
+            style={{
+              minHeight: '100dvh',
+              // Padding for notched phones (safe-area insets)
+              paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+              paddingRight: 'max(1rem, env(safe-area-inset-right))',
+            }}
+          >
 
             {/* Desktop Floating Left Sidebar */}
             <div className="hidden lg:block flex-shrink-0">
@@ -81,17 +99,27 @@ export default function App() {
                   className="fixed inset-0 bg-[rgba(17,17,17,0.4)]"
                   onClick={() => setMobileNavOpen(false)}
                 />
-                <div className="relative z-10 w-72 max-w-[85vw] bg-white h-full overflow-y-auto border-r border-[#E5E5E5] flex flex-col">
+                {/* Drawer panel — does NOT contain a sticky sidebar, just scrollable nav content */}
+                <div
+                  className="relative z-10 bg-white h-full overflow-y-auto border-r border-[#E5E5E5] flex flex-col"
+                  style={{
+                    width: 'min(18rem, 85vw)',
+                    paddingLeft: 'env(safe-area-inset-left)',
+                    paddingBottom: 'env(safe-area-inset-bottom)',
+                  }}
+                >
                   <div className="flex justify-end p-4">
                     <button
                       onClick={() => setMobileNavOpen(false)}
                       className="p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
                       aria-label="Close navigation"
+                      style={{ minWidth: '44px', minHeight: '44px' }}
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
-                  <div onClick={() => setMobileNavOpen(false)} className="flex-1">
+                  {/* Render sidebar in non-sticky context inside drawer */}
+                  <div onClick={() => setMobileNavOpen(false)} className="flex-1 px-2 pb-6">
                     <StorefrontSidebar />
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { formatPrice } from '../../utils/formatPrice'
 import { StockBadge, CategoryBadge } from '../common/Badge'
 import { useCart } from '../../context/CartContext'
 import { handleImageError } from '../../utils/imageFallback'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function ProductCard({ product }) {
   const { addToCart, items } = useCart()
@@ -26,7 +27,7 @@ export default function ProductCard({ product }) {
       {/* Product Image & Badges */}
       <Link to={`/product/${product.id}`} className="relative aspect-[4/5] overflow-hidden bg-[#F8F8F6] block">
         <img
-          src={product.image_url}
+          src={cldUrl(product.image_url, { width: 400, height: 500, crop: 'fill' })}
           alt={product.name}
           loading="lazy"
           onError={handleImageError}

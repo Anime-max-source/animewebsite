@@ -12,6 +12,7 @@ import { useApp } from '../context/AppContext'
 import { formatPrice } from '../utils/formatPrice'
 import { OrderStatusBadge } from '../components/common/Badge'
 import { OWNER_WHATSAPP, OWNER_UPI_ID } from '../lib/clerkClient'
+import { cldUrl } from '../lib/cloudinary'
 
 export default function OrderConfirmation() {
   const { orderId } = useParams()
@@ -148,8 +149,9 @@ export default function OrderConfirmation() {
             <div key={idx} className="py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
-                  src={item.image_url}
+                  src={cldUrl(item.image_url, { width: 160, height: 160, crop: 'fill' })}
                   alt={item.name}
+                  loading="lazy"
                   className="w-11 h-11 object-cover rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5]"
                 />
                 <div>

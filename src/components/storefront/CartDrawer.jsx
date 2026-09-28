@@ -12,6 +12,7 @@ import {
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
 import { handleImageError } from '../../utils/imageFallback'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function CartDrawer() {
   const { items, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart()
@@ -33,8 +34,15 @@ export default function CartDrawer() {
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white border-l border-[#E5E5E5] flex flex-col">
+      <div className="fixed inset-y-0 right-0 max-w-full flex" style={{ paddingLeft: 'min(2.5rem, 10vw)' }}>
+        <div
+          className="w-screen max-w-md bg-white border-l border-[#E5E5E5] flex flex-col"
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+            paddingRight: 'env(safe-area-inset-right)',
+          }}
+        >
 
           {/* Drawer Header */}
           <div className="px-6 py-5 border-b border-[#E5E5E5] flex items-center justify-between bg-white">
@@ -83,8 +91,9 @@ export default function CartDrawer() {
                   className="flex gap-3.5 p-4 rounded-[12px] bg-white border border-[#E5E5E5] transition-colors hover:bg-[#F8F8F6]"
                 >
                   <img
-                    src={item.image_url}
+                    src={cldUrl(item.image_url, { width: 160, height: 160, crop: 'fill' })}
                     alt={item.name}
+                    loading="lazy"
                     onError={handleImageError}
                     className="w-16 h-20 rounded-[12px] object-cover bg-[#F8F8F6] border border-[#E5E5E5] flex-shrink-0"
                   />

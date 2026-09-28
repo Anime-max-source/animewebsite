@@ -4,6 +4,7 @@ import { ArrowLeft, ShoppingBag } from '@phosphor-icons/react'
 import CheckoutForm from '../../components/storefront/CheckoutForm'
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function Checkout() {
   const { items, cartTotal, cartCount } = useCart()
@@ -69,8 +70,9 @@ export default function Checkout() {
               <div key={item.id} className="flex items-center justify-between gap-3 text-sm">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img
-                    src={item.image_url}
+                    src={cldUrl(item.image_url, { width: 96, height: 112, crop: 'fill' })}
                     alt={item.name}
+                    loading="lazy"
                     className="w-12 h-14 object-cover rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex-shrink-0"
                   />
                   <div className="truncate">

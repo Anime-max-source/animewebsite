@@ -3,12 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Prevent Android auto-dark-mode from inverting storefront colours -->
+    <meta name="color-scheme" content="light" />
     <title>AnimeMax | Premium Anime Merchandise &amp; Collectibles</title>
     <meta name="description" content="Shop premium anime figures, clothing, posters, and accessories at AnimeMax. Authentic merchandise delivered to your doorstep." />
-    <!-- Keep Outfit/Space Grotesk for admin panel (unchanged) -->
+    <!-- Preload Syne (800w) so the logo renders with correct font on first paint -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;500;600&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body class="min-h-screen antialiased">

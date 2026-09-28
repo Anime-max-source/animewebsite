@@ -13,6 +13,7 @@ import { useApp } from '../../context/AppContext'
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
 import { handleImageError } from '../../utils/imageFallback'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function Home() {
   const { products } = useApp()
@@ -278,7 +279,7 @@ export default function Home() {
                     className="relative aspect-square overflow-hidden bg-[#F8F8F6] m-3 rounded-[12px] border border-[#E5E5E5] block"
                   >
                     <img
-                      src={product.image_url}
+                      src={cldUrl(product.image_url, { width: 400, height: 400, crop: 'fill' })}
                       alt={product.name}
                       loading="lazy"
                       onError={handleImageError}

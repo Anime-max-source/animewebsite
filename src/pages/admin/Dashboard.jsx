@@ -31,6 +31,7 @@ import {
 } from 'recharts'
 import { useApp } from '../../context/AppContext'
 import { formatPrice } from '../../utils/formatPrice'
+import { cldUrl } from '../../lib/cloudinary'
 import FulfillmentDetailsModal from '../../components/admin/FulfillmentDetailsModal'
 
 export default function Dashboard() {
@@ -754,8 +755,9 @@ export default function Dashboard() {
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <img
-                        src={item.image_url}
+                        src={cldUrl(item.image_url, { width: 80, height: 80, crop: 'fill' })}
                         alt={item.name}
+                        loading="lazy"
                         className="w-10 h-10 rounded-lg object-cover bg-gray-100 border border-[#EDEDED] shrink-0"
                       />
                       <span className="font-semibold text-[#111827] truncate max-w-xs sm:max-w-md">

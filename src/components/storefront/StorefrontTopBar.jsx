@@ -34,7 +34,7 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
   return (
     <>
       {/* ── Top Bar ───────────────────────────────────────────────────── */}
-      <header className="w-full bg-white border border-[#E5E5E5] rounded-[12px] px-3 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 mb-6 min-w-0">
+      <header className="w-full bg-white border border-[#E5E5E5] rounded-[12px] px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 mb-6 min-w-0" style={{ minHeight: '56px' }}>
 
         {/* Left: Mobile menu + Brand logo / Status */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -42,15 +42,17 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
           <button
             type="button"
             onClick={onMobileMenuToggle}
-            className="lg:hidden p-2 rounded-[12px] text-[#111111] hover:bg-[#F8F8F6] transition-colors flex-shrink-0"
+            className="lg:hidden rounded-[12px] text-[#111111] hover:bg-[#F8F8F6] transition-colors flex-shrink-0"
             aria-label="Open navigation menu"
+            style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <List size={20} />
           </button>
 
           {/* On mobile: display AnimaxLogo directly in the top bar */}
           <Link to="/" className="lg:hidden flex items-center flex-shrink-0" aria-label="AnimeMax home">
-            <AnimaxLogo className="text-base sm:text-lg" />
+            {/* icon-only on very narrow screens, full wordmark on wider */}
+            <AnimaxLogo className="animemax-logo-topbar" />
           </Link>
 
           {/* Status chip / Welcome on desktop */}
@@ -99,12 +101,13 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
         {/* Right: Cart + Profile */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
 
-          {/* Cart button */}
+          {/* Cart button — 44px min touch target */}
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
-            className="relative p-2 sm:p-2.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] hover:bg-[#F1F1EE] text-[#111111] transition-colors flex-shrink-0"
+            className="relative rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] hover:bg-[#F1F1EE] text-[#111111] transition-colors flex-shrink-0"
             aria-label="View Shopping Cart"
+            style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <ShoppingBag size={20} />
             {cartCount > 0 && (
@@ -135,8 +138,8 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
           ) : (
             <Link
               to="/signin"
-              className="sf-btn-primary text-xs h-9 px-3 sm:px-4 whitespace-nowrap flex-shrink-0"
-              style={{ height: '36px', minHeight: 'unset', fontSize: '13px' }}
+              className="sf-btn-primary whitespace-nowrap flex-shrink-0"
+              style={{ height: '44px', minHeight: '44px', fontSize: '13px', padding: '0 0.75rem' }}
             >
               Sign In
             </Link>

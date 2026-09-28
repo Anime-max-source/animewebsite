@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { BANNER_SPECS, uploadBannerImage } from '../../utils/imageCompressor'
+import { cldUrl } from '../../lib/cloudinary'
 import Modal from '../../components/common/Modal'
 
 export default function ManageBanners() {
@@ -198,8 +199,9 @@ export default function ManageBanners() {
                 <div className={`relative rounded-xl overflow-hidden aspect-[16/9] border border-[#EDEDED] ${sec.themeBg} flex items-center justify-center`}>
                   {banner.image_url ? (
                     <img
-                      src={banner.image_url}
+                      src={cldUrl(banner.image_url, { width: 800, height: 450, crop: 'fill' })}
                       alt={banner.headline}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   ) : (

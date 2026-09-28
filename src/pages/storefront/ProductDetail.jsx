@@ -17,6 +17,7 @@ import { formatPrice } from '../../utils/formatPrice'
 import { StockBadge, CategoryBadge } from '../../components/common/Badge'
 import ProductCard from '../../components/storefront/ProductCard'
 import { handleImageError } from '../../utils/imageFallback'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -96,7 +97,7 @@ export default function ProductDetail() {
         <div className="lg:col-span-6 space-y-4">
           <div className="relative aspect-[4/5] rounded-[12px] overflow-hidden bg-[#F8F8F6] border border-[#E5E5E5]">
             <img
-              src={product.image_url}
+              src={cldUrl(product.image_url, { width: 1200 })}
               alt={product.name}
               onError={handleImageError}
               className={`w-full h-full object-cover object-center ${isSoldOut ? 'grayscale-[30%]' : ''}`}

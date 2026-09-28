@@ -49,7 +49,7 @@ export default function StorefrontFooter() {
 
         {/* Brand */}
         <div className="space-y-3">
-          <AnimaxLogo className="h-7" />
+          <AnimaxLogo className="text-xl" />
           <p className="text-xs text-[#6B6B6B] leading-relaxed max-w-[45ch]">
             India's dedicated destination for premium anime statues, authentic apparel, and collector merchandise.
           </p>

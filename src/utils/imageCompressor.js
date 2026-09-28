@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { uploadImage as cloudinaryUpload, isCloudinaryConfigured, PRESETS } from '../lib/cloudinary'
 
 /**
  * Recommended dimension specs per section
@@ -118,18 +119,31 @@ export async function compressImage(file, maxDimension = 1400, quality = 0.82) {
 }
 
 /**
- * Upload a compressed banner image to Supabase Storage (bucket: 'homepage-banners').
- * Gracefully falls back to Data URL if storage bucket is unavailable or unconfigured.
+ * Upload a banner image.
+ *
+ * Priority order:
+ *   1. Cloudinary (if VITE_CLOUDINARY_CLOUD_NAME is set)            → res.cloudinary.com URL
+ *   2. Supabase Storage bucket 'homepage-banners' (if configured)   → supabase.co URL
+ *   3. Compressed Data URL fallback (always works, local only)
+ *
+ * The caller (ManageBanners.jsx) just awaits { url } — no changes needed there.
  *
  * @param {string} section - 'hero' | 'weekly_drop' | 'collector_spotlight' | 'style_editorial'
- * @param {File} file - Original file
+ * @param {File} file - Original image file selected by admin
  * @returns {Promise<{ url: string, isStorage: boolean, sizeBytes: number }>}
  */
 export async function uploadBannerImage(section, file) {
   const spec = BANNER_SPECS[section] || { maxDimension: 1200 }
+
+  // ── 1. Cloudinary (primary) ───────────────────────────────────────────────
+  if (isCloudinaryConfigured) {
+    const { secure_url } = await cloudinaryUpload(file, PRESETS.banners)
+    return { url: secure_url, isStorage: true, sizeBytes: file.size }
+  }
+
+  // ── 2. Supabase Storage (fallback) ────────────────────────────────────────
   const compressed = await compressImage(file, spec.maxDimension, 0.85)
 
-  // If Supabase is configured, attempt upload to 'homepage-banners' bucket
   if (isSupabaseConfigured && supabase) {
     try {
       const fileExt = compressed.mimeType === 'image/webp' ? 'webp' : 'jpg'
@@ -157,17 +171,18 @@ export async function uploadBannerImage(section, file) {
           }
         }
       } else if (error) {
-        console.warn('Supabase storage upload returned error, using compressed Data URL fallback:', error.message)
+        console.warn('Supabase storage upload returned error, using Data URL fallback:', error.message)
       }
     } catch (err) {
       console.warn('Supabase storage upload failed, using Data URL fallback:', err)
     }
   }
 
-  // Fallback: return the compressed Data URL
+  // ── 3. Data URL (last resort) ─────────────────────────────────────────────
   return {
     url: compressed.dataUrl,
     isStorage: false,
     sizeBytes: compressed.sizeBytes
   }
 }
+

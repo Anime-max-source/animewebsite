@@ -17,6 +17,8 @@
   --accent-orange: #F59E0B;
   --text-primary: #111827;
   --text-muted: #6B7280;
+  /* Prevent Android auto-dark from inverting colours on all pages */
+  color-scheme: light;
 }
 
 /* Admin body base: keep Outfit font and admin bg */
@@ -468,4 +470,89 @@
 }
 .sf-animate-slide-up {
   animation: sf-slide-up 0.25s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS — STOREFRONT ONLY
+   All rules are either globally safe or scoped to [data-theme="storefront"].
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Reinforce color-scheme on storefront root to block Android auto-dark */
+[data-theme="storefront"] {
+  color-scheme: light;
+}
+
+/* ── Inputs: 16px minimum font-size prevents iOS Safari auto-zoom on focus ── */
+[data-theme="storefront"] .sf-input,
+[data-theme="storefront"] .sf-textarea,
+[data-theme="storefront"] input.sf-input,
+[data-theme="storefront"] textarea.sf-textarea {
+  font-size: 16px;
+}
+/* Keep label text at 14px (these are not focusable, no zoom trigger) */
+[data-theme="storefront"] label {
+  font-size: 14px;
+}
+
+/* ── Touch targets: all interactive controls at least 44×44px ────────────── */
+[data-theme="storefront"] .sf-btn-primary,
+[data-theme="storefront"] .sf-btn-secondary,
+[data-theme="storefront"] .sf-btn-ghost {
+  min-height: 44px;
+}
+[data-theme="storefront"] .sf-chip {
+  /* chips are typically in a scrollable row, keep 36px but ensure padding */
+  min-height: 36px;
+}
+
+/* ── AnimeMax logo: responsive font-size via class ───────────────────────── */
+/* Default: full wordmark at text-lg */
+.animemax-logo-topbar {
+  font-size: 1.125rem;  /* 18px */
+}
+/* Below 360px: shrink to fit the header without overlap */
+@media (max-width: 359px) {
+  .animemax-logo-topbar {
+    font-size: 0.9rem; /* slightly smaller to keep everything on one line */
+  }
+}
+
+/* ── Product grid: 1-column on very small phones (< 340px) ──────────────── */
+@media (max-width: 339px) {
+  [data-theme="storefront"] .grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ── Prevent horizontal overflow globally ───────────────────────────────── */
+[data-theme="storefront"] {
+  max-width: 100vw;
+}
+[data-theme="storefront"] img {
+  max-width: 100%;
+  height: auto;
+}
+/* Flex / grid children must not overflow their parent */
+[data-theme="storefront"] .min-w-0 {
+  min-width: 0;
+}
+
+/* ── Safe-area bottom spacing for fixed bottom bars ────────────────────── */
+.sf-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── 100dvh with vh fallback for sections that fill the viewport ─────────── */
+.sf-screen-height {
+  min-height: 100vh;         /* fallback */
+  min-height: 100dvh;        /* mobile browser UI-aware */
+}
+
+/* ── Cart drawer close-button touch target ──────────────────────────────── */
+[data-theme="storefront"] button[aria-label="Close cart"] {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

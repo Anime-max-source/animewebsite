@@ -19,6 +19,7 @@ import {
 import { useApp } from '../../context/AppContext'
 import { formatPrice } from '../../utils/formatPrice'
 import AnimaxLogo from './AnimaxLogo'
+import { cldUrl } from '../../lib/cloudinary'
 
 export default function StorefrontSidebar() {
   const { mockUser, setMockUser, logout, orders, products } = useApp()
@@ -83,12 +84,16 @@ export default function StorefrontSidebar() {
       <aside className="w-full lg:w-56 xl:w-64 flex-shrink-0 lg:pr-6">
         <div
           className="sticky top-6 flex flex-col gap-6"
-          style={{ height: 'calc(100vh - 3rem)', overflowY: 'auto' }}
+          style={{
+            /* 100dvh accounts for mobile browser UI chrome; vh is fallback */
+            height: 'calc(100dvh - 3rem)',
+            overflowY: 'auto',
+          }}
         >
 
           {/* Logo */}
-          <Link to="/" className="flex items-center" aria-label="AnimeMax home">
-            <AnimaxLogo className="h-8" />
+          <Link to="/" className="flex items-center flex-shrink-0" aria-label="AnimeMax home">
+            <AnimaxLogo className="text-xl" />
           </Link>
 
           {/* ── Category Navigation ────────────────────────────────────── */}
@@ -178,8 +183,9 @@ export default function StorefrontSidebar() {
                       <div className="w-9 h-9 rounded-[12px] bg-white border border-[#E5E5E5] flex-shrink-0 flex items-center justify-center overflow-hidden">
                         {order.order_items?.[0]?.product?.image_url ? (
                           <img
-                            src={order.order_items[0].product.image_url}
+                            src={cldUrl(order.order_items[0].product.image_url, { width: 96, height: 96, crop: 'fill' })}
                             alt="order thumb"
+                            loading="lazy"
                             className="w-full h-full object-cover"
                           />
                         ) : (
