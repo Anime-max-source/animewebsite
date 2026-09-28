@@ -120,6 +120,11 @@ export default function ManageBanners() {
     e.preventDefault()
     if (!activeSection || !formData) return
 
+    if (formData.cta_link && formData.cta_link.trim().toLowerCase().startsWith('javascript:')) {
+      alert('Invalid link: javascript: URLs are not allowed.')
+      return
+    }
+
     try {
       setIsSaving(true)
       await updateBanner(activeSection, formData)
