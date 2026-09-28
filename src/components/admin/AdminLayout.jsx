@@ -1,13 +1,24 @@
 import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import AdminSidebar from './AdminSidebar'
 import AdminTopBar from './AdminTopBar'
 import HelpModal from './HelpModal'
 import { X } from 'lucide-react'
 
 export default function AdminLayout({ children }) {
+  const location = useLocation()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
+
+  // Auth pages (e.g. /admin/login) must not expose internal admin shell or order counters
+  if (location.pathname.startsWith('/admin/login')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F6F8] text-[#111827] font-sans antialiased p-4">
+        {children}
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex bg-[#F5F6F8] text-[#111827] font-sans antialiased">
