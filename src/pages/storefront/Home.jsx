@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heart,
@@ -42,14 +42,18 @@ export default function Home() {
     }
   })
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('animemax_wishlist', JSON.stringify(wishlist))
+    } catch {
+      // quota or private mode fallback
+    }
+  }, [wishlist])
+
   const toggleWishlist = (id, e) => {
     e.preventDefault()
     e.stopPropagation()
-    setWishlist(prev => {
-      const next = prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-      localStorage.setItem('animemax_wishlist', JSON.stringify(next))
-      return next
-    })
+    setWishlist(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]))
   }
 
   // Filter Categories
