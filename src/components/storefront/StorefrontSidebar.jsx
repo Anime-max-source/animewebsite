@@ -75,8 +75,11 @@ export default function StorefrontSidebar() {
     return currentSearch.includes(cat.query)
   }
 
-  const recentOrders = (orders || []).slice(0, 2)
   const isBuyerSignedIn = mockUser && mockUser.role !== 'guest'
+  const myOrders = isBuyerSignedIn && mockUser?.id
+    ? (orders || []).filter((o) => o.user_id === mockUser.id)
+    : []
+  const recentOrders = myOrders.slice(0, 2)
 
   return (
     <>
@@ -181,9 +184,9 @@ export default function StorefrontSidebar() {
                       className="p-2.5 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center gap-2.5"
                     >
                       <div className="w-9 h-9 rounded-[12px] bg-white border border-[#E5E5E5] flex-shrink-0 flex items-center justify-center overflow-hidden">
-                        {order.order_items?.[0]?.product?.image_url ? (
+                        {(order.items?.[0]?.image_url || order.order_items?.[0]?.product?.image_url) ? (
                           <img
-                            src={cldUrl(order.order_items[0].product.image_url, { width: 96, height: 96, crop: 'fill' })}
+                            src={cldUrl(order.items?.[0]?.image_url || order.order_items[0].product.image_url, { width: 96, height: 96, crop: 'fill' })}
                             alt="order thumb"
                             loading="lazy"
                             className="w-full h-full object-cover"
