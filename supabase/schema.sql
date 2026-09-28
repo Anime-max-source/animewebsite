@@ -8,11 +8,15 @@ create extension if not exists "pgcrypto";
 
 -- 1. PRODUCTS TABLE
 create table if not exists public.products (
-    id uuid primary key default gen_random_uuid(),
+    id text primary key default gen_random_uuid()::text,
     name text not null,
     description text,
     price numeric not null check (price >= 0),
     category text not null,
+    series text,
+    edition text,
+    color text,
+    hw_num integer,
     image_url text,
     stock integer not null default 0 check (stock >= 0),
     in_stock boolean not null default true,
