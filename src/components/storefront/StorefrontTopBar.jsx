@@ -22,7 +22,9 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
   const [aboutModalOpen, setAboutModalOpen] = useState(false)
 
   const isBuyerSignedIn = mockUser && mockUser.role !== 'guest'
-  const buyerOrdersCount = orders ? orders.length : 0
+  const buyerOrdersCount = isBuyerSignedIn && mockUser?.id && orders
+    ? orders.filter((o) => o.user_id === mockUser.id).length
+    : 0
 
   const handleToggle = (tab) => {
     setActiveToggle(tab)
