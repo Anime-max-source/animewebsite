@@ -31,28 +31,28 @@ export default function AdminLogin() {
         </p>
       </div>
 
-      {isClerkConfigured && (
+      {isClerkConfigured ? (
         <div className="flex justify-center bg-white p-4 rounded-xl border border-[#EDEDED] shadow-2xs">
           <ClerkSignIn routing="path" path="/admin/login" fallbackRedirectUrl="/admin" />
         </div>
-      )}
+      ) : (
+        <div className="bg-white p-6 rounded-xl border border-[#EDEDED] shadow-2xs text-center space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider">Fast Track Demo Access</h2>
+            <p className="text-xs text-[#6B7280]">
+              Enter the admin panel immediately using the configured store owner profile.
+            </p>
+          </div>
 
-      <div className="bg-white p-6 rounded-xl border border-[#EDEDED] shadow-2xs text-center space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-xs font-bold text-[#111827] uppercase tracking-wider">Fast Track Demo Access</h2>
-          <p className="text-xs text-[#6B7280]">
-            Enter the admin panel immediately using the configured store owner profile.
-          </p>
+          <button
+            onClick={handleDemoOwnerLogin}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Continue with Local Owner Session</span>
+          </button>
         </div>
-
-        <button
-          onClick={handleDemoOwnerLogin}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
-        >
-          <ShieldCheck className="w-4 h-4" />
-          <span>Continue with Local Owner Session</span>
-        </button>
-      </div>
+      )}
     </div>
   )
 }
