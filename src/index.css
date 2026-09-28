@@ -263,6 +263,17 @@
   border-color: #DC2626;
 }
 
+/* Prevent mobile iOS zoom on input focus (minimum 16px font-size required) */
+@media (max-width: 640px) {
+  [data-theme="storefront"] .sf-input,
+  [data-theme="storefront"] input.sf-input,
+  [data-theme="storefront"] select.sf-input,
+  [data-theme="storefront"] .sf-textarea,
+  [data-theme="storefront"] textarea.sf-textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Ensure padding utility classes override defaults when an icon or badge is inside */
 [data-theme="storefront"] .sf-input.pl-9,
 [data-theme="storefront"] input.sf-input.pl-9 {
