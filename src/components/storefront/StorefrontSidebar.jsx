@@ -86,21 +86,25 @@ export default function StorefrontSidebar() {
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <aside className="w-full lg:w-56 xl:w-64 flex-shrink-0 lg:pr-6">
         <div
-          className="sticky top-6 flex flex-col gap-6"
+          className="sticky top-6 flex flex-col"
           style={{
             /* 100dvh accounts for mobile browser UI chrome; vh is fallback */
             height: 'calc(100dvh - 3rem)',
-            overflowY: 'auto',
           }}
         >
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center flex-shrink-0" aria-label="AnimeMax home">
-            <AnimaxLogo className="text-xl" />
-          </Link>
+          {/* Logo — Fixed height matching StorefrontTopBar h-14 (56px) and mb-6 */}
+          <div className="h-14 flex items-center flex-shrink-0 mb-6 px-1">
+            <Link to="/" className="flex items-center flex-shrink-0" aria-label="AnimeMax home">
+              <AnimaxLogo className="text-2xl" />
+            </Link>
+          </div>
 
-          {/* ── Category Navigation ────────────────────────────────────── */}
-          <nav className="flex flex-col gap-0.5">
+          {/* ── Scrollable Navigation Body ─────────────────────────────── */}
+          <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-6 custom-scrollbar">
+
+            {/* ── Category Navigation ────────────────────────────────────── */}
+            <nav className="flex flex-col gap-0.5">
             {navCategories.map((cat) => {
               const active = isCatActive(cat)
               const IconComponent = cat.icon
@@ -274,6 +278,7 @@ export default function StorefrontSidebar() {
             )}
           </div>
 
+          </div>
         </div>
       </aside>
 
@@ -287,8 +292,15 @@ export default function StorefrontSidebar() {
 
       {/* ── Modal: Request a Product ───────────────────────────────────── */}
       {modalType === 'request' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in" style={{ background: 'rgba(17,17,17,0.4)' }}>
-          <div className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-md w-full p-6 relative sf-animate-slide-up">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in"
+          style={{ background: 'rgba(17,17,17,0.4)' }}
+          onClick={() => setModalType(null)}
+        >
+          <div
+            className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-md w-full p-6 relative sf-animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setModalType(null)}
               className="absolute top-4 right-4 p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"
@@ -347,8 +359,15 @@ export default function StorefrontSidebar() {
 
       {/* ── Modal: Notify on Restock ───────────────────────────────────── */}
       {modalType === 'restock' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in" style={{ background: 'rgba(17,17,17,0.4)' }}>
-          <div className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-md w-full p-6 relative sf-animate-slide-up">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in"
+          style={{ background: 'rgba(17,17,17,0.4)' }}
+          onClick={() => setModalType(null)}
+        >
+          <div
+            className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-md w-full p-6 relative sf-animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setModalType(null)}
               className="absolute top-4 right-4 p-2 rounded-[12px] text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F8F8F6] transition-colors"

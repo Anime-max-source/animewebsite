@@ -21,6 +21,7 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
   const [activeToggle, setActiveToggle] = useState('shop') // 'shop' | 'about'
   const [aboutModalOpen, setAboutModalOpen] = useState(false)
 
+  const navigate = useNavigate()
   const isBuyerSignedIn = mockUser && mockUser.role !== 'guest'
   const buyerOrdersCount = isBuyerSignedIn && mockUser?.id && orders
     ? orders.filter((o) => o.user_id === mockUser.id).length
@@ -28,7 +29,9 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
 
   const handleToggle = (tab) => {
     setActiveToggle(tab)
-    if (tab === 'about') {
+    if (tab === 'shop') {
+      navigate('/')
+    } else if (tab === 'about') {
       setAboutModalOpen(true)
     }
   }
@@ -36,17 +39,16 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
   return (
     <>
       {/* ── Top Bar ───────────────────────────────────────────────────── */}
-      <header className="w-full bg-white border border-[#E5E5E5] rounded-[12px] px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 mb-6 min-w-0" style={{ minHeight: '56px' }}>
+      <header className="w-full bg-white border border-[#E5E5E5] rounded-[12px] px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 mb-6 min-w-0 h-14" style={{ minHeight: '56px' }}>
 
         {/* Left: Mobile menu + Brand logo / Status */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          {/* Mobile menu button */}
+          {/* Mobile menu button — hidden on desktop (lg:hidden) */}
           <button
             type="button"
             onClick={onMobileMenuToggle}
-            className="lg:hidden rounded-[12px] text-[#111111] hover:bg-[#F8F8F6] transition-colors flex-shrink-0"
+            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-[12px] text-[#111111] hover:bg-[#F8F8F6] transition-colors flex-shrink-0"
             aria-label="Open navigation menu"
-            style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <List size={20} />
           </button>
@@ -155,8 +157,15 @@ export default function StorefrontTopBar({ onMobileMenuToggle }) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sf-animate-fade-in"
           style={{ background: 'rgba(17,17,17,0.4)' }}
+          onClick={() => {
+            setAboutModalOpen(false)
+            setActiveToggle('shop')
+          }}
         >
-          <div className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-lg w-full p-6 sm:p-8 relative sf-animate-slide-up">
+          <div
+            className="bg-white rounded-[12px] border border-[#E5E5E5] max-w-lg w-full p-6 sm:p-8 relative sf-animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => {
                 setAboutModalOpen(false)

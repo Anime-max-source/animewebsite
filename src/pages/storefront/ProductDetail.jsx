@@ -95,12 +95,12 @@ export default function ProductDetail() {
 
         {/* Product Image */}
         <div className="lg:col-span-6 space-y-4">
-          <div className="relative aspect-[4/5] rounded-[12px] overflow-hidden bg-[#F8F8F6] border border-[#E5E5E5]">
+          <div className="relative aspect-[4/5] sm:aspect-square lg:aspect-[4/5] rounded-[12px] overflow-hidden bg-[#F8F8F6] border border-[#E5E5E5] flex items-center justify-center p-4">
             <img
               src={cldUrl(product.image_url, { width: 1200 })}
               alt={product.name}
               onError={handleImageError}
-              className={`w-full h-full object-cover object-center ${isSoldOut ? 'grayscale-[30%]' : ''}`}
+              className={`max-w-full max-h-full object-contain ${isSoldOut ? 'grayscale-[30%]' : ''}`}
             />
             {isSoldOut && (
               <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(17,17,17,0.4)' }}>

@@ -280,17 +280,17 @@ export default function Home() {
                   {/* Product Image */}
                   <Link
                     to={`/product/${product.id}`}
-                    className="relative aspect-square overflow-hidden bg-[#F8F8F6] m-3 rounded-[12px] border border-[#E5E5E5] block"
+                    className="relative aspect-square overflow-hidden bg-[#F8F8F6] m-3 rounded-[12px] border border-[#E5E5E5] flex items-center justify-center p-2 block"
                   >
                     <img
-                      src={cldUrl(product.image_url, { width: 400, height: 400, crop: 'fill' })}
+                      src={cldUrl(product.image_url, { width: 400, height: 400, crop: 'limit' })}
                       alt={product.name}
                       loading="lazy"
                       onError={handleImageError}
-                      className="sf-product-img w-full h-full object-cover object-center"
+                      className="sf-product-img max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                     {!product.in_stock && (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(17,17,17,0.4)' }}>
+                      <div className="absolute inset-0 flex items-center justify-center rounded-[12px]" style={{ background: 'rgba(17,17,17,0.4)' }}>
                         <span className="px-3 py-1 rounded-[12px] bg-[#DC2626] text-white text-[10px] font-bold tracking-widest uppercase">
                           Sold Out
                         </span>

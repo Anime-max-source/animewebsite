@@ -22,9 +22,9 @@ export default function Cart() {
     return (
       <div className="sf-empty-state max-w-md mx-auto my-20">
         <ShoppingBag size={32} className="text-[#6B6B6B] mb-4" />
-        <h2 className="text-xl font-bold text-[#111111] mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
+        <h1 className="text-xl font-bold text-[#111111] mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
           Your Cart is Empty
-        </h2>
+        </h1>
         <p className="text-sm text-[#6B6B6B] leading-relaxed max-w-[45ch] mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
           You haven't added any anime figures or merchandise to your cart yet.
         </p>

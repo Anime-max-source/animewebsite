@@ -10,6 +10,18 @@ export const isSupabaseConfigured = Boolean(
   supabaseUrl.startsWith('https://')
 )
 
+// Clean unauthenticated / public client that always uses the valid Supabase anon key
+// and does not store or read sessions from localStorage (prevents RS256 token leakage)
+export const supabaseAnon = isSupabaseConfigured 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    }) 
+  : null
+
 let clerkTokenGetter = null
 
 /**
@@ -28,19 +40,26 @@ export function getClerkTokenGetter() {
 async function resolveClerkToken(getter) {
   if (typeof getter !== 'function') return null
   try {
-    // 1. First attempt: standard Clerk third-party template named 'supabase'
+    // Only use Clerk third-party template named 'supabase' (configured with Supabase JWT Secret)
     const token = await getter({ template: 'supabase' })
-    if (token) return token
+    if (token) {
+      // Decode JWT header to verify algorithm
+      try {
+        const header = JSON.parse(atob(token.split('.')[0]))
+        if (header.alg === 'HS256') {
+          return token
+        } else {
+          console.warn(`[Supabase] Clerk token algorithm is ${header.alg}, but PostgREST expects HS256. Skipping token to prevent PGRST301.`)
+          return null
+        }
+      } catch {
+        return null
+      }
+    }
   } catch (err) {
-    // Template 'supabase' may not be configured in Clerk Dashboard; fall back to session token
-  }
-
-  try {
-    // 2. Fallback: Clerk session JWT
-    const fallbackToken = await getter()
-    if (fallbackToken) return fallbackToken
-  } catch (err) {
-    console.warn('Failed to retrieve Clerk session token:', err)
+    // Template 'supabase' is not configured in Clerk Dashboard.
+    // NOTE: NEVER fall back to getter() without template because Clerk's raw session token
+    // is signed with RS256 and will trigger PostgREST error PGRST301 ("No suitable key or wrong key type").
   }
 
   return null
