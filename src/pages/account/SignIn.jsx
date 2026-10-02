@@ -55,6 +55,14 @@ export default function SignIn() {
                 <div>• <strong>To test locally:</strong> Use your Development key (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">pk_test_...</code>) in <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">.env</code>, or click the button below.</div>
                 <div>• <strong>In production:</strong> Live Clerk auth renders automatically on <strong>https://animemax.shop</strong>.</div>
               </div>
+              <div className="pt-2">
+                <button
+                  onClick={() => handleDemoSignIn('buyer')}
+                  className="sf-btn-primary w-full py-2.5 text-xs font-semibold justify-center"
+                >
+                  Continue with One-Click Demo Buyer
+                </button>
+              </div>
             </div>
           )}
 
@@ -63,18 +71,6 @@ export default function SignIn() {
               <ClerkSignIn routing="path" path="/signin" signUpUrl="/signup" fallbackRedirectUrl="/account" />
             </div>
           )}
-
-          <div className="text-center pt-2">
-            <button
-              onClick={() => handleDemoSignIn('buyer')}
-              className={isProductionKeyOnLocalhost 
-                ? "sf-btn-primary w-full py-2.5 text-xs font-semibold justify-center"
-                : "text-sm text-[#6B6B6B] hover:text-[#111111] underline transition-colors"
-              }
-            >
-              Continue with One-Click Demo Buyer
-            </button>
-          </div>
         </div>
       ) : (
         <div className="bg-white p-6 sm:p-8 rounded-[12px] border border-[#E5E5E5] space-y-4">

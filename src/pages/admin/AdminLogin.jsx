@@ -46,6 +46,15 @@ export default function AdminLogin() {
                 <div>• <strong>To test locally:</strong> Use your Development key (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">pk_test_...</code>) in <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">.env</code>, or click the button below.</div>
                 <div>• <strong>In production:</strong> Live Clerk auth renders automatically on <strong>https://animemax.shop</strong>.</div>
               </div>
+              <div className="pt-2">
+                <button
+                  onClick={handleDemoOwnerLogin}
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Continue with Local Owner Session</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -54,18 +63,6 @@ export default function AdminLogin() {
               <ClerkSignIn routing="path" path="/admin/login" fallbackRedirectUrl="/admin" />
             </div>
           )}
-          <div className="text-center">
-            <button
-              onClick={handleDemoOwnerLogin}
-              className={isProductionKeyOnLocalhost
-                ? "w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
-                : "text-xs text-[#6B7280] hover:text-[#111827] underline transition-colors"
-              }
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Continue with Local Owner Session</span>
-            </button>
-          </div>
         </div>
       ) : (
         <div className="bg-white p-6 rounded-xl border border-[#EDEDED] shadow-2xs text-center space-y-4">
