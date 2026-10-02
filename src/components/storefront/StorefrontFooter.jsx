@@ -18,8 +18,8 @@ export default function StorefrontFooter() {
             <ShieldCheck size={20} className="text-[#111111]" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-[#111111]">100% Authentic Merch</h4>
-            <p className="text-xs text-[#6B6B6B] mt-0.5">Official Tokyo imported scale figures</p>
+            <h4 className="text-sm font-semibold text-[#111111]">Quality Assured</h4>
+            <p className="text-xs text-[#6B6B6B] mt-0.5">Curated collectible merchandise</p>
           </div>
         </div>
 
@@ -29,7 +29,7 @@ export default function StorefrontFooter() {
           </div>
           <div>
             <h4 className="text-sm font-semibold text-[#111111]">Safe All-India Shipping</h4>
-            <p className="text-xs text-[#6B6B6B] mt-0.5">Dispatched in 24h with armored bubble wrap</p>
+            <p className="text-xs text-[#6B6B6B] mt-0.5">Dispatched in 24h with protective packaging</p>
           </div>
         </div>
 

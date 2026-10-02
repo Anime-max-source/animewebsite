@@ -50,7 +50,7 @@ export const INITIAL_BANNERS = {
     section: 'hero',
     eyebrow_tag: 'Exclusive Season Drop',
     headline: 'GET UP TO 50% OFF',
-    subtext: 'Authentic scale figures, heavy-weight embroidered hoodies, and holographic wall scrolls. Fresh Akihabara import shipments.',
+    subtext: 'Authentic die-cast models, collector merchandise, and wall scrolls. Fresh drops added regularly.',
     cta_text: 'Get Discount',
     cta_link: '#catalog-view',
     image_url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&auto=format&fit=crop&q=80',
@@ -141,6 +141,10 @@ export function AppProvider({ children }) {
       const saved = localStorage.getItem(BANNERS_STORAGE_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
+        if (parsed?.hero?.subtext && parsed.hero.subtext.includes('Akihabara')) {
+          parsed.hero.subtext = INITIAL_BANNERS.hero.subtext
+          localStorage.setItem(BANNERS_STORAGE_KEY, JSON.stringify(parsed))
+        }
         return { ...INITIAL_BANNERS, ...parsed }
       }
       return INITIAL_BANNERS

@@ -16,8 +16,8 @@ export default function Footer() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-white font-semibold text-sm">100% Authentic Merch</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Licensed scale figures & premium apparel</p>
+                <h4 className="text-white font-semibold text-sm">Quality Assured</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Scale models & premium collectibles</p>
               </div>
             </div>
 

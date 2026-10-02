@@ -59,7 +59,7 @@ export default function Navbar() {
           <span>⚡ Fast Dispatch • Safe UPI Payments on WhatsApp</span>
         </div>
         <div className="hidden sm:flex items-center gap-4 text-[11px] text-slate-400">
-          <span>Official Akihabara Imports</span>
+          <span>Curated Collector Merchandise</span>
         </div>
       </div>
 

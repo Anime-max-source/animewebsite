@@ -232,7 +232,7 @@ export default function ProductDetail() {
                   This collectible is currently Sold Out.
                 </p>
                 <p className="text-xs text-[#6B6B6B]">
-                  New batch is being manufactured or imported. Check back soon!
+                  A restock is currently in progress. Check back soon!
                 </p>
                 <button
                   disabled

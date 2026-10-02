@@ -48,7 +48,7 @@ export default function StorefrontSidebar() {
   const handleRequestSubmit = (e) => {
     e.preventDefault()
     if (!requestItemName.trim()) return
-    showToast(`Request received for "${requestItemName}"! We'll search Japanese suppliers.`)
+    showToast(`Request received for "${requestItemName}"! We'll search our supplier network.`)
     setRequestItemName('')
     setRequestAnime('')
     setModalType(null)
@@ -341,9 +341,9 @@ export default function StorefrontSidebar() {
             <div className="w-10 h-10 rounded-[12px] bg-[#F8F8F6] border border-[#E5E5E5] flex items-center justify-center mb-4">
               <Plus size={24} className="text-[#111111]" />
             </div>
-            <h3 className="text-xl font-bold text-[#111111] font-['Syne']">Request an Anime Product</h3>
+            <h3 className="text-xl font-bold text-[#111111] font-['Syne']">Request a Collectible or Product</h3>
             <p className="text-sm text-[#6B6B6B] mt-1 mb-5 font-['Inter']">
-              Can't find your favorite figure or hoodie? Tell us what you're looking for and our Japan team will source it.
+              Can't find your favorite collectible or item? Tell us what you're looking for and our team will check availability.
             </p>
             <form onSubmit={handleRequestSubmit} className="space-y-4">
               <div>
