@@ -7,6 +7,12 @@ import {
   Image as PhImage,
   TShirt,
   Diamond,
+  Car,
+  Truck,
+  Lightning,
+  Sword,
+  Radio,
+  User,
   Plus,
   SignOut,
   SignIn,
@@ -56,27 +62,35 @@ export default function StorefrontSidebar() {
     setModalType(null)
   }
 
-  // Category Icon Resolver
-  const getCategoryIcon = (slug, name) => {
+  // Category Icon Resolver matching the 8 real categories
+  const getCategoryIcon = (slug, name, icon) => {
     const s = (slug || name || '').toLowerCase()
+    const ic = (icon || '').toLowerCase()
+    if (ic === 'car' || s.includes('hot-wheel') || s.includes('wheel')) return Car
+    if (ic === 'truck' || s.includes('die-cast') || s.includes('cast')) return Truck
+    if (ic === 'bolt' || ic === 'lightning' || s.includes('marvel')) return Lightning
+    if (ic === 'sparkles' || ic === 'sparkle' || s.includes('anime')) return Sparkle
+    if (ic === 'image' || s.includes('poster') || s.includes('decor') || s.includes('wall')) return PhImage
+    if (ic === 'sword' || s.includes('katana') || s.includes('blade')) return Sword
+    if (ic === 'radio' || s.includes('rc-car') || s.includes('rc')) return Radio
+    if (ic === 'user' || s.includes('shinchan') || s.includes('shin')) return User
     if (s.includes('figure') || s.includes('statue')) return Cube
-    if (s.includes('poster') || s.includes('art') || s.includes('wall')) return PhImage
-    if (s.includes('cloth') || s.includes('apparel') || s.includes('wear') || s.includes('hoodie')) return TShirt
-    if (s.includes('access') || s.includes('keychain') || s.includes('toy') || s.includes('car')) return Diamond
+    if (s.includes('cloth') || s.includes('apparel') || s.includes('hoodie')) return TShirt
+    if (s.includes('access') || s.includes('keychain')) return Diamond
     return Sparkle
   }
 
   // Categories config — Phosphor icons (24px)
   const navCategories = React.useMemo(() => {
     const top = [
-      { name: 'Popular Products', query: 'category=anime-figures', icon: Fire },
+      { name: 'Popular Products', query: 'category=hot-wheels', icon: Fire },
       { name: 'Explore New', query: '', icon: Sparkle, isExplore: true },
     ]
     const sorted = [...categories].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
     const dynamicCats = sorted.map(c => ({
       name: c.name,
       query: `category=${c.slug || c.id}`,
-      icon: getCategoryIcon(c.slug, c.name)
+      icon: getCategoryIcon(c.slug, c.name, c.icon)
     }))
     return [...top, ...dynamicCats]
   }, [categories])

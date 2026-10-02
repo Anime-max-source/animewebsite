@@ -116,7 +116,7 @@ export default function Home() {
 
         if (activeCategoryObj && itemCatId && itemCatId === activeCategoryObj.id) {
           matchesCat = true
-        } else if (activeCategoryObj && itemCat === activeCategoryObj.name.toLowerCase()) {
+        } else if (activeCategoryObj && (itemCat === activeCategoryObj.name.toLowerCase() || itemCat === activeCategoryObj.slug.toLowerCase())) {
           matchesCat = true
         } else if (itemCat === lowerActive || itemSeries === lowerActive) {
           matchesCat = true

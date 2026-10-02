@@ -7,11 +7,16 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
   const { products = [], categories = [] } = useApp()
   const fileInputRef = useRef(null)
 
+  // Sort categories strictly by display_order (1 to 8)
+  const sortedCategories = React.useMemo(() => {
+    return [...categories].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+  }, [categories])
+
   // Find initial category ID
-  const defaultCategory = categories.find(
+  const defaultCategory = sortedCategories.find(
     c => c.id === initialProduct?.category_id || 
          c.name.toLowerCase() === (initialProduct?.category || '').toLowerCase()
-  ) || categories[0]
+  ) || sortedCategories[0]
 
   const [formData, setFormData] = useState({
     name: initialProduct?.name || '',
@@ -184,7 +189,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
             }}
             className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] cursor-pointer"
           >
-            {categories.map((cat) => (
+            {sortedCategories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>

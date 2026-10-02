@@ -23,12 +23,25 @@ export function generateSlug(text) {
 }
 
 export const INITIAL_CATEGORIES = [
-  { id: 'cat-anime-figures', name: 'Anime Figures', slug: 'anime-figures', display_order: 1 },
-  { id: 'cat-keychains', name: 'Keychains', slug: 'keychains', display_order: 2 },
-  { id: 'cat-toy-cars', name: 'Toy Cars', slug: 'toy-cars', display_order: 3 },
-  { id: 'cat-posters', name: 'Posters & Wall Art', slug: 'posters', display_order: 4 },
-  { id: 'cat-apparel', name: 'Apparel', slug: 'apparel', display_order: 5 },
-  { id: 'cat-accessories', name: 'Accessories', slug: 'accessories', display_order: 6 },
+  { id: 'cat-hot-wheels', name: 'Hot Wheels', slug: 'hot-wheels', display_order: 1, icon: 'car' },
+  { id: 'cat-die-cast', name: 'Die Cast', slug: 'die-cast', display_order: 2, icon: 'truck' },
+  { id: 'cat-marvel', name: 'Marvel', slug: 'marvel', display_order: 3, icon: 'bolt' },
+  { id: 'cat-anime', name: 'Anime', slug: 'anime', display_order: 4, icon: 'sparkles' },
+  { id: 'cat-posters-wall-decor', name: 'Posters & Wall Decor', slug: 'posters-wall-decor', display_order: 5, icon: 'image' },
+  { id: 'cat-katanas', name: 'Katanas', slug: 'katanas', display_order: 6, icon: 'sword' },
+  { id: 'cat-rc-cars', name: 'RC Cars', slug: 'rc-cars', display_order: 7, icon: 'radio' },
+  { id: 'cat-shinchan', name: 'Shinchan', slug: 'shinchan', display_order: 8, icon: 'user' },
+]
+
+export const APPROVED_CATEGORY_SLUGS = [
+  'hot-wheels',
+  'die-cast',
+  'marvel',
+  'anime',
+  'posters-wall-decor',
+  'katanas',
+  'rc-cars',
+  'shinchan'
 ]
 
 
@@ -142,8 +155,24 @@ export function AppProvider({ children }) {
       const saved = localStorage.getItem(CATEGORIES_STORAGE_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const approvedMap = new Map(INITIAL_CATEGORIES.map(c => [c.slug, c]))
+          const validSaved = parsed.filter(c => c && c.slug && approvedMap.has(c.slug))
+
+          // Add any missing approved categories from INITIAL_CATEGORIES
+          const existingSlugs = new Set(validSaved.map(c => c.slug))
+          INITIAL_CATEGORIES.forEach(cat => {
+            if (!existingSlugs.has(cat.slug)) {
+              validSaved.push(cat)
+            }
+          })
+
+          const sorted = validSaved.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+          localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(sorted))
+          return sorted
+        }
       }
+      localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(INITIAL_CATEGORIES))
       return INITIAL_CATEGORIES
     } catch {
       return INITIAL_CATEGORIES

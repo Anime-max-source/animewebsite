@@ -10,13 +10,35 @@ import {
   Check, 
   ExternalLink,
   ArrowUpDown,
-  Tag
+  Tag,
+  Car,
+  Truck,
+  Zap,
+  Sparkles,
+  Image as LucideImage,
+  Swords,
+  Radio,
+  Smile
 } from 'lucide-react'
 import { useApp, generateSlug } from '../../context/AppContext'
 import Modal from '../../components/common/Modal'
 
 export default function ManageCategories() {
   const { categories = [], products = [], addCategory, updateCategory, deleteCategory } = useApp()
+
+  const getCategoryLucideIcon = (cat) => {
+    const s = (cat.slug || cat.name || '').toLowerCase()
+    const ic = (cat.icon || '').toLowerCase()
+    if (ic === 'car' || s.includes('hot-wheel') || s.includes('wheel')) return Car
+    if (ic === 'truck' || s.includes('die-cast') || s.includes('cast')) return Truck
+    if (ic === 'bolt' || ic === 'lightning' || s.includes('marvel')) return Zap
+    if (ic === 'sparkles' || ic === 'sparkle' || s.includes('anime')) return Sparkles
+    if (ic === 'image' || s.includes('poster') || s.includes('decor') || s.includes('wall')) return LucideImage
+    if (ic === 'sword' || s.includes('katana') || s.includes('blade')) return Swords
+    if (ic === 'radio' || s.includes('rc-car') || s.includes('rc')) return Radio
+    if (ic === 'user' || s.includes('shinchan') || s.includes('shin')) return Smile
+    return Tag
+  }
 
   const [searchFilter, setSearchFilter] = useState('')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -284,7 +306,15 @@ export default function ManageCategories() {
 
                       {/* Name */}
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-[#111827] text-sm flex items-center gap-2">
+                        <div className="font-bold text-[#111827] text-sm flex items-center gap-2.5">
+                          {(() => {
+                            const IconComponent = getCategoryLucideIcon(cat)
+                            return (
+                              <div className="w-7 h-7 rounded-lg bg-[#F5F6F8] border border-[#EDEDED] flex items-center justify-center text-[#4B5563] shrink-0">
+                                <IconComponent className="w-3.5 h-3.5" />
+                              </div>
+                            )
+                          })()}
                           <span>{cat.name}</span>
                         </div>
                       </td>
