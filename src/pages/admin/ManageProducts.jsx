@@ -7,7 +7,7 @@ import ProductForm from '../../components/admin/ProductForm'
 import Modal from '../../components/common/Modal'
 
 export default function ManageProducts() {
-  const { products, categories = [], addProduct, updateProduct, deleteProduct, toggleSoldOut, resetCatalog } = useApp()
+  const { products, categories = [], addProduct, updateProduct, deleteProduct, toggleSoldOut } = useApp()
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -73,15 +73,6 @@ export default function ManageProducts() {
             <Tags className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Manage Categories</span>
           </Link>
-
-          <button
-            onClick={() => resetCatalog()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#EDEDED] bg-white hover:bg-gray-50 text-xs font-semibold text-[#4B5563] shadow-2xs transition-all"
-            title="Restore default catalog items"
-          >
-            <RefreshCw className="w-3.5 h-3.5 text-[#6B7280]" />
-            <span>Reset Defaults</span>
-          </button>
           
           <button
             onClick={() => setIsAddModalOpen(true)}

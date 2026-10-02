@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SignIn as ClerkSignIn } from '@clerk/clerk-react'
-import { isClerkConfigured } from '../../lib/clerkClient'
+import { isClerkConfigured, isProductionKeyOnLocalhost } from '../../lib/clerkClient'
 import { useApp } from '../../context/AppContext'
-import { Fire, ShieldCheck, User } from '@phosphor-icons/react'
+import { Fire, ShieldCheck, User, Info, ArrowSquareOut } from '@phosphor-icons/react'
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -42,14 +42,35 @@ export default function SignIn() {
       {/* If Clerk is live configured, render Clerk's native SignIn */}
       {isClerkConfigured ? (
         <div className="space-y-4">
-          <div className="flex justify-center">
-            <ClerkSignIn routing="path" path="/signin" signUpUrl="/signup" fallbackRedirectUrl="/account" />
-          </div>
+          {isProductionKeyOnLocalhost && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-amber-800">
+                <Info size={18} className="text-amber-600 shrink-0" weight="fill" />
+                <span>Clerk Production Key Active on Localhost</span>
+              </div>
+              <p className="text-amber-700 leading-relaxed">
+                Clerk restricts production keys (<code className="bg-amber-100 px-1 py-0.5 rounded text-[11px] font-mono">pk_live_...</code>) to your production domain (<strong>animemax.shop</strong>). Because requests originate from <strong>localhost</strong>, Clerk blocks the embedded login form.
+              </p>
+              <div className="pt-1 flex flex-col gap-1.5 text-[11px] text-amber-800">
+                <div>• <strong>To test locally:</strong> Use your Development key (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">pk_test_...</code>) in <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">.env</code>, or click the button below.</div>
+                <div>• <strong>In production:</strong> Live Clerk auth renders automatically on <strong>https://animemax.shop</strong>.</div>
+              </div>
+            </div>
+          )}
+
+          {!isProductionKeyOnLocalhost && (
+            <div className="flex justify-center">
+              <ClerkSignIn routing="path" path="/signin" signUpUrl="/signup" fallbackRedirectUrl="/account" />
+            </div>
+          )}
 
           <div className="text-center pt-2">
             <button
               onClick={() => handleDemoSignIn('buyer')}
-              className="text-sm text-[#6B6B6B] hover:text-[#111111] underline transition-colors"
+              className={isProductionKeyOnLocalhost 
+                ? "sf-btn-primary w-full py-2.5 text-xs font-semibold justify-center"
+                : "text-sm text-[#6B6B6B] hover:text-[#111111] underline transition-colors"
+              }
             >
               Continue with One-Click Demo Buyer
             </button>

@@ -1,9 +1,9 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SignIn as ClerkSignIn } from '@clerk/clerk-react'
-import { isClerkConfigured } from '../../lib/clerkClient'
+import { isClerkConfigured, isProductionKeyOnLocalhost } from '../../lib/clerkClient'
 import { useApp } from '../../context/AppContext'
-import { ShieldCheck, Lock } from 'lucide-react'
+import { ShieldCheck, Lock, Info } from 'lucide-react'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -33,15 +33,37 @@ export default function AdminLogin() {
 
       {isClerkConfigured ? (
         <div className="space-y-4">
-          <div className="flex justify-center bg-white p-4 rounded-xl border border-[#EDEDED] shadow-2xs">
-            <ClerkSignIn routing="path" path="/admin/login" fallbackRedirectUrl="/admin" />
-          </div>
+          {isProductionKeyOnLocalhost && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 space-y-2">
+              <div className="flex items-center gap-2 font-semibold text-amber-800">
+                <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Clerk Production Key Active on Localhost</span>
+              </div>
+              <p className="text-amber-700 leading-relaxed">
+                Clerk restricts production keys (<code className="bg-amber-100 px-1 py-0.5 rounded text-[11px] font-mono">pk_live_...</code>) to your production domain (<strong>animemax.shop</strong>). Because requests originate from <strong>localhost</strong>, Clerk blocks the embedded login form.
+              </p>
+              <div className="pt-1 flex flex-col gap-1.5 text-[11px] text-amber-800">
+                <div>• <strong>To test locally:</strong> Use your Development key (<code className="bg-amber-100 px-1 py-0.5 rounded font-mono">pk_test_...</code>) in <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">.env</code>, or click the button below.</div>
+                <div>• <strong>In production:</strong> Live Clerk auth renders automatically on <strong>https://animemax.shop</strong>.</div>
+              </div>
+            </div>
+          )}
+
+          {!isProductionKeyOnLocalhost && (
+            <div className="flex justify-center bg-white p-4 rounded-xl border border-[#EDEDED] shadow-2xs">
+              <ClerkSignIn routing="path" path="/admin/login" fallbackRedirectUrl="/admin" />
+            </div>
+          )}
           <div className="text-center">
             <button
               onClick={handleDemoOwnerLogin}
-              className="text-xs text-[#6B7280] hover:text-[#111827] underline transition-colors"
+              className={isProductionKeyOnLocalhost
+                ? "w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-all"
+                : "text-xs text-[#6B7280] hover:text-[#111827] underline transition-colors"
+              }
             >
-              Continue with Local Owner Session
+              <ShieldCheck className="w-4 h-4" />
+              <span>Continue with Local Owner Session</span>
             </button>
           </div>
         </div>

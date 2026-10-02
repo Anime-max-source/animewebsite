@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
-import { INITIAL_PRODUCTS } from '../utils/seedData'
 import { supabase, supabaseAnon, isSupabaseConfigured } from '../lib/supabaseClient'
 import { isClerkConfigured, OWNER_CLERK_ID, isOwnerUser } from '../lib/clerkClient'
 
@@ -97,12 +96,14 @@ export function AppProvider({ children }) {
       if (saved !== null) {
         const parsed = JSON.parse(saved)
         if (Array.isArray(parsed)) {
-          return parsed.filter((p) => !p.id?.startsWith('prod-00'))
+          const cleaned = parsed.filter((p) => p && p.id && !p.id.startsWith('prod-00') && !p.id.startsWith('hw-'))
+          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(cleaned))
+          return cleaned
         }
       }
-      return isSupabaseConfigured ? [] : INITIAL_PRODUCTS
+      return []
     } catch {
-      return isSupabaseConfigured ? [] : INITIAL_PRODUCTS
+      return []
     }
   })
 
@@ -112,12 +113,14 @@ export function AppProvider({ children }) {
       if (saved !== null) {
         const parsed = JSON.parse(saved)
         if (Array.isArray(parsed)) {
-          return parsed.filter((o) => o.id !== 'ord-9042' && o.id !== 'ord-8711')
+          const cleaned = parsed.filter((o) => o && o.id && o.id !== 'ord-9042' && o.id !== 'ord-8711' && !String(o.id).startsWith('ord-demo'))
+          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(cleaned))
+          return cleaned
         }
       }
-      return INITIAL_DEMO_ORDERS
+      return []
     } catch {
-      return INITIAL_DEMO_ORDERS
+      return []
     }
   })
 
@@ -350,7 +353,7 @@ export function AppProvider({ children }) {
     if (!isSupabaseConfigured) return
 
     try {
-      const client = supabase || supabaseAnon
+      const client = supabaseAnon || supabase
       let { data: remoteOrders, error: ordErr } = await client
         .from('orders')
         .select('*')
@@ -368,13 +371,13 @@ export function AppProvider({ children }) {
       }
 
       if (!ordErr && Array.isArray(remoteOrders)) {
-        if (remoteOrders.length > 0) {
-          setOrders(prev => {
-            const remoteIds = new Set(remoteOrders.map(o => String(o.id)))
-            const uniqueLocal = (prev || []).filter(o => !remoteIds.has(String(o.id)))
-            return [...remoteOrders, ...uniqueLocal]
-          })
-        }
+        const cleanRemote = remoteOrders.filter(
+          o => o && o.id && o.id !== 'ord-9042' && o.id !== 'ord-8711' && !String(o.id).startsWith('ord-demo')
+        )
+        setOrders(cleanRemote)
+        try {
+          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(cleanRemote))
+        } catch (e) {}
       } else if (ordErr) {
         console.warn('Orders fetch warning:', ordErr.message)
       }
@@ -385,26 +388,30 @@ export function AppProvider({ children }) {
 
   // Load from Supabase if configured
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return
+    if (!isSupabaseConfigured) return
 
     async function loadSupabaseData() {
       setIsLoading(true)
       try {
-        const { data: remoteProducts, error: prodErr } = await supabase
+        const client = supabaseAnon || supabase
+        const { data: remoteProducts, error: prodErr } = await client
           .from('products')
           .select('*')
           .order('created_at', { ascending: false })
 
         if (!prodErr && Array.isArray(remoteProducts)) {
-          if (remoteProducts.length > 0) {
-            setProducts(remoteProducts)
-          } else {
-            // If remote products is empty, preserve local products so newly added items are not wiped
-            setProducts(prev => (prev && prev.length > 0 ? prev : []))
-          }
+          const cleanRemote = remoteProducts.filter(
+            p => p && p.id && !p.id.startsWith('hw-') && !p.id.startsWith('prod-00')
+          )
+          setProducts(cleanRemote)
+          try {
+            localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(cleanRemote))
+          } catch (e) {}
+        } else if (prodErr) {
+          console.warn('Products fetch notice:', prodErr.message)
         }
 
-        const { data: remoteProfiles, error: profErr } = await supabase
+        const { data: remoteProfiles, error: profErr } = await client
           .from('buyer_profiles')
           .select('*')
 
@@ -428,6 +435,67 @@ export function AppProvider({ children }) {
     }
 
     loadSupabaseData()
+  }, [])
+
+  // Cross-tab storage synchronization
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === PRODUCTS_STORAGE_KEY) {
+        try {
+          const updated = JSON.parse(e.newValue || '[]')
+          if (Array.isArray(updated)) {
+            setProducts(updated.filter(p => p && p.id && !p.id.startsWith('hw-') && !p.id.startsWith('prod-00')))
+          }
+        } catch {}
+      } else if (e.key === ORDERS_STORAGE_KEY) {
+        try {
+          const updated = JSON.parse(e.newValue || '[]')
+          if (Array.isArray(updated)) {
+            setOrders(updated.filter(o => o && o.id && o.id !== 'ord-9042' && o.id !== 'ord-8711' && !String(o.id).startsWith('ord-demo')))
+          }
+        } catch {}
+      }
+    }
+
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
+
+  // Supabase Realtime subscriptions for multi-device / multi-browser live sync
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    const client = supabaseAnon || supabase
+    if (!client || typeof client.channel !== 'function') return
+
+    const productChannel = client
+      .channel('animemax-live-products')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+        try {
+          const { data } = await client.from('products').select('*').order('created_at', { ascending: false })
+          if (Array.isArray(data)) {
+            const clean = data.filter(p => p && p.id && !p.id.startsWith('hw-') && !p.id.startsWith('prod-00'))
+            setProducts(clean)
+            try {
+              localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(clean))
+            } catch {}
+          }
+        } catch {}
+      })
+      .subscribe()
+
+    const orderChannel = client
+      .channel('animemax-live-orders')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
+        await refreshOrders()
+      })
+      .subscribe()
+
+    return () => {
+      try {
+        client.removeChannel(productChannel)
+        client.removeChannel(orderChannel)
+      } catch {}
+    }
   }, [])
 
   // Helper to demote conflicting products when assigning single-slot or max-slot sections
@@ -680,15 +748,29 @@ export function AppProvider({ children }) {
   }
 
   const deleteProduct = async (id) => {
-    if (isSupabaseConfigured && supabase) {
+    // 1. Immediately update local state & localStorage so UI is instant and doesn't flicker
+    setProducts(prev => {
+      const next = prev.filter(p => p.id !== id)
       try {
-        await supabase.from('products').delete().eq('id', id)
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    // 2. Persist deletion to Supabase
+    if (isSupabaseConfigured) {
+      try {
+        const client = supabaseAnon || supabase
+        const { error } = await client.from('products').delete().eq('id', id)
+        if (error) {
+          console.warn('[Supabase] Failed to delete product from database:', error.message)
+        } else {
+          console.log(`[Supabase] Product ${id} deleted successfully from database`)
+        }
       } catch (err) {
-        console.error(err)
+        console.error('[Supabase] deleteProduct exception:', err)
       }
     }
-
-    setProducts(prev => prev.filter(p => p.id !== id))
   }
 
   // Helper to ensure valid RFC4122 v4 UUID for Supabase
@@ -756,22 +838,26 @@ export function AppProvider({ children }) {
   }
 
   const updateOrderStatus = async (orderId, newStatus) => {
-    // 1. Immediately update React state immutably so order switches tabs instantly
-    setOrders(prev =>
-      prev.map(o => (String(o.id) === String(orderId) ? { ...o, status: newStatus } : o))
-    )
+    // 1. Immediately update React state and localStorage immutably
+    setOrders(prev => {
+      const next = prev.map(o => (String(o.id) === String(orderId) ? { ...o, status: newStatus } : o))
+      try {
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
 
     // 2. Persist update to Supabase
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured) {
       try {
-        const { data, error } = await supabase
+        const client = supabaseAnon || supabase
+        const { error } = await client
           .from('orders')
           .update({ status: newStatus })
           .eq('id', orderId)
-          .select()
 
         if (error) {
-          console.error(`[Supabase] Failed to update order #${orderId} status:`, error.message || error)
+          console.warn(`[Supabase] Failed to update order #${orderId} status:`, error.message || error)
         } else {
           console.log(`[Supabase] Order #${orderId} status successfully updated to "${newStatus}"`)
         }
@@ -782,21 +868,29 @@ export function AppProvider({ children }) {
   }
 
   const deleteOrder = async (orderId) => {
-    if (isSupabaseConfigured && supabase) {
+    // 1. Immediately update state and localStorage
+    setOrders(prev => {
+      const next = prev.filter(o => String(o.id) !== String(orderId))
       try {
-        const client = supabase || supabaseAnon
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    // 2. Persist deletion to Supabase
+    if (isSupabaseConfigured) {
+      try {
+        const client = supabaseAnon || supabase
         const { error } = await client.from('orders').delete().eq('id', orderId)
         if (error) {
-          console.error('[Supabase] Failed to delete order:', error.message)
+          console.warn('[Supabase] Failed to delete order from database:', error.message)
         } else {
-          console.log(`[Supabase] Order #${orderId} deleted successfully`)
+          console.log(`[Supabase] Order #${orderId} deleted successfully from database`)
         }
       } catch (err) {
         console.error('[Supabase] deleteOrder exception:', err)
       }
     }
-
-    setOrders(prev => prev.filter(o => String(o.id) !== String(orderId)))
   }
 
   // Buyer Profile Operations
@@ -870,15 +964,6 @@ export function AppProvider({ children }) {
     return await updateBanner(section, INITIAL_BANNERS[section])
   }
 
-  const resetCatalog = () => {
-    setProducts(INITIAL_PRODUCTS)
-    try {
-      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(INITIAL_PRODUCTS))
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
   return (
     <AppContext.Provider
       value={{
@@ -900,7 +985,6 @@ export function AppProvider({ children }) {
         updateProduct,
         toggleSoldOut,
         deleteProduct,
-        resetCatalog,
         createOrder,
         updateOrderStatus,
         deleteOrder,

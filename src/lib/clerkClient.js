@@ -6,6 +6,15 @@ export const isClerkConfigured = Boolean(
   !CLERK_PUBLISHABLE_KEY.includes('placeholder')
 )
 
+export const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.local'))
+
+export const isProductionKeyOnLocalhost = Boolean(
+  isClerkConfigured && 
+  CLERK_PUBLISHABLE_KEY.startsWith('pk_live_') && 
+  isLocalhost
+)
+
 export const OWNER_CLERK_ID = import.meta.env.VITE_OWNER_CLERK_ID || 'user_owner_animemax'
 export const OWNER_WHATSAPP = import.meta.env.VITE_OWNER_WHATSAPP || '+919876543210'
 export const OWNER_UPI_ID = import.meta.env.VITE_OWNER_UPI_ID || 'animemax@upi'
