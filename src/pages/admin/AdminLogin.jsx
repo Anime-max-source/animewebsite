@@ -32,8 +32,18 @@ export default function AdminLogin() {
       </div>
 
       {isClerkConfigured ? (
-        <div className="flex justify-center bg-white p-4 rounded-xl border border-[#EDEDED] shadow-2xs">
-          <ClerkSignIn routing="path" path="/admin/login" fallbackRedirectUrl="/admin" />
+        <div className="space-y-4">
+          <div className="flex justify-center bg-white p-4 rounded-xl border border-[#EDEDED] shadow-2xs">
+            <ClerkSignIn routing="path" path="/admin/login" fallbackRedirectUrl="/admin" />
+          </div>
+          <div className="text-center">
+            <button
+              onClick={handleDemoOwnerLogin}
+              className="text-xs text-[#6B7280] hover:text-[#111827] underline transition-colors"
+            >
+              Continue with Local Owner Session
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bg-white p-6 rounded-xl border border-[#EDEDED] shadow-2xs text-center space-y-4">

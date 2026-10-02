@@ -10,6 +10,27 @@ const ORDERS_STORAGE_KEY = 'animemax_orders_v1'
 const PROFILES_STORAGE_KEY = 'animemax_profiles_v1'
 const MOCK_USER_STORAGE_KEY = 'animemax_mock_user_v1'
 const BANNERS_STORAGE_KEY = 'animemax_banners_v1'
+const CATEGORIES_STORAGE_KEY = 'animemax_categories_v1'
+
+export function generateSlug(text) {
+  return (text || '')
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+export const INITIAL_CATEGORIES = [
+  { id: 'cat-anime-figures', name: 'Anime Figures', slug: 'anime-figures', display_order: 1 },
+  { id: 'cat-keychains', name: 'Keychains', slug: 'keychains', display_order: 2 },
+  { id: 'cat-toy-cars', name: 'Toy Cars', slug: 'toy-cars', display_order: 3 },
+  { id: 'cat-posters', name: 'Posters & Wall Art', slug: 'posters', display_order: 4 },
+  { id: 'cat-apparel', name: 'Apparel', slug: 'apparel', display_order: 5 },
+  { id: 'cat-accessories', name: 'Accessories', slug: 'accessories', display_order: 6 },
+]
+
 
 export const INITIAL_BANNERS = {
   hero: {
@@ -60,28 +81,26 @@ export function AppProvider({ children }) {
   const [products, setProducts] = useState(() => {
     try {
       const saved = localStorage.getItem(PRODUCTS_STORAGE_KEY)
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved)
-        // Filter out legacy placeholder products (prod-001 through prod-008)
-        const cleaned = parsed.filter((p) => !p.id?.startsWith('prod-00'))
-        if (cleaned && cleaned.length > 0) {
-          return cleaned
+        if (Array.isArray(parsed)) {
+          return parsed.filter((p) => !p.id?.startsWith('prod-00'))
         }
       }
-      return INITIAL_PRODUCTS
+      return isSupabaseConfigured ? [] : INITIAL_PRODUCTS
     } catch {
-      return INITIAL_PRODUCTS
+      return isSupabaseConfigured ? [] : INITIAL_PRODUCTS
     }
   })
 
   const [orders, setOrders] = useState(() => {
     try {
       const saved = localStorage.getItem(ORDERS_STORAGE_KEY)
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved)
-        // Filter out legacy demo orders
-        const cleaned = parsed.filter((o) => o.id !== 'ord-9042' && o.id !== 'ord-8711')
-        return cleaned
+        if (Array.isArray(parsed)) {
+          return parsed.filter((o) => o.id !== 'ord-9042' && o.id !== 'ord-8711')
+        }
       }
       return INITIAL_DEMO_ORDERS
     } catch {
@@ -116,6 +135,21 @@ export function AppProvider({ children }) {
       return INITIAL_BANNERS
     }
   })
+
+  // Dynamic categories state (Part 1: owner-managed categories)
+  const [categories, setCategories] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CATEGORIES_STORAGE_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      }
+      return INITIAL_CATEGORIES
+    } catch {
+      return INITIAL_CATEGORIES
+    }
+  })
+
 
   // User state - defaults to guest visitor
   const [mockUser, setMockUser] = useState(() => {
@@ -208,6 +242,41 @@ export function AppProvider({ children }) {
     }
   }, [banners])
 
+  // Sync categories to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories))
+    } catch (e) {
+      console.error(e)
+    }
+  }, [categories])
+
+  const categoriesTableAvailableRef = useRef(true)
+
+  // Dedicated function to fetch/refresh categories from Supabase
+  const refreshCategories = async () => {
+    if (!isSupabaseConfigured || !supabase || !categoriesTableAvailableRef.current) return
+
+    try {
+      const { data: remoteCategories, error: catErr } = await supabase
+        .from('categories')
+        .select('*')
+        .order('display_order', { ascending: true })
+
+      if (!catErr && Array.isArray(remoteCategories) && remoteCategories.length > 0) {
+        setCategories(remoteCategories)
+      } else if (catErr && (catErr.code === 'PGRST205' || catErr.message?.includes('schema cache'))) {
+        categoriesTableAvailableRef.current = false
+      } else if (catErr) {
+        console.warn('Categories fetch notice:', catErr.message)
+      }
+    } catch (err) {
+      console.warn('Failed to refresh categories from Supabase:', err)
+    }
+  }
+
+
+
   // Dedicated function to fetch/refresh homepage banners from Supabase
   const refreshBanners = async () => {
     if (!isSupabaseConfigured || !supabase) return
@@ -224,7 +293,17 @@ export function AppProvider({ children }) {
             remoteMap[b.section] = b
           }
         })
-        setBanners(prev => ({ ...prev, ...remoteMap }))
+        setBanners(prev => {
+          const merged = { ...prev }
+          Object.keys(remoteMap).forEach(sec => {
+            const local = prev[sec]
+            const remote = remoteMap[sec]
+            if (!local || !local.updated_at || !remote.updated_at || new Date(remote.updated_at) >= new Date(local.updated_at)) {
+              merged[sec] = remote
+            }
+          })
+          return merged
+        })
       } else if (banErr) {
         console.warn('Homepage banners fetch notice:', banErr.message)
       }
@@ -255,12 +334,14 @@ export function AppProvider({ children }) {
         }
       }
 
-      if (!ordErr && remoteOrders) {
-        setOrders(prev => {
-          const remoteIds = new Set(remoteOrders.map(o => String(o.id)))
-          const localOnly = prev.filter(o => !remoteIds.has(String(o.id)))
-          return [...remoteOrders, ...localOnly]
-        })
+      if (!ordErr && Array.isArray(remoteOrders)) {
+        if (remoteOrders.length > 0) {
+          setOrders(prev => {
+            const remoteIds = new Set(remoteOrders.map(o => String(o.id)))
+            const uniqueLocal = (prev || []).filter(o => !remoteIds.has(String(o.id)))
+            return [...remoteOrders, ...uniqueLocal]
+          })
+        }
       } else if (ordErr) {
         console.warn('Orders fetch warning:', ordErr.message)
       }
@@ -281,12 +362,31 @@ export function AppProvider({ children }) {
           .select('*')
           .order('created_at', { ascending: false })
 
-        if (!prodErr && remoteProducts && remoteProducts.length > 0) {
-          setProducts(remoteProducts)
+        if (!prodErr && Array.isArray(remoteProducts)) {
+          if (remoteProducts.length > 0) {
+            setProducts(remoteProducts)
+          } else {
+            // If remote products is empty, preserve local products so newly added items are not wiped
+            setProducts(prev => (prev && prev.length > 0 ? prev : []))
+          }
+        }
+
+        const { data: remoteProfiles, error: profErr } = await supabase
+          .from('buyer_profiles')
+          .select('*')
+
+        if (!profErr && Array.isArray(remoteProfiles)) {
+          const profMap = {}
+          remoteProfiles.forEach(p => {
+            if (p.user_id) profMap[p.user_id] = p
+          })
+          setBuyerProfiles(profMap)
         }
 
         await refreshOrders()
         await refreshBanners()
+        await refreshCategories()
+
       } catch (err) {
         console.warn('Supabase fetch failed, falling back to local store', err)
       } finally {
@@ -341,20 +441,132 @@ export function AppProvider({ children }) {
     return updatedList
   }
 
+  // Category Operations (Part 1: Unlimited, Owner-Managed Categories)
+  const addCategory = async (catData) => {
+    const rawName = (catData.name || '').trim()
+    if (!rawName) throw new Error('Category name is required')
+    const slug = (catData.slug || generateSlug(rawName)).trim()
+    const displayOrder = parseInt(catData.display_order) || (categories.length + 1)
+
+    const newCategory = {
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'cat-' + Date.now(),
+      name: rawName,
+      slug: slug,
+      display_order: displayOrder,
+      created_at: new Date().toISOString(),
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .insert([newCategory])
+          .select()
+
+        if (!error && data?.[0]) {
+          const created = data[0]
+          setCategories(prev => {
+            const next = [...prev.filter(c => c.id !== created.id && c.slug !== created.slug), created]
+            return next.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+          })
+          return created
+        } else if (error && error.code !== 'PGRST205') {
+          console.warn('Supabase category insert notice:', error.message)
+        }
+      } catch (err) {
+        console.warn('Supabase category insert error, saved locally:', err)
+      }
+    }
+
+    setCategories(prev => {
+      const next = [...prev.filter(c => c.slug !== newCategory.slug), newCategory]
+      return next.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    })
+    return newCategory
+  }
+
+  const updateCategory = async (id, updates) => {
+    const sanitized = {
+      ...updates,
+      name: updates.name ? updates.name.trim() : undefined,
+      display_order: updates.display_order !== undefined ? parseInt(updates.display_order) : undefined,
+      slug: updates.slug ? generateSlug(updates.slug) : undefined,
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('categories').update(sanitized).eq('id', id)
+      } catch (err) {
+        console.warn('Supabase category update error:', err)
+      }
+    }
+
+    setCategories(prev => {
+      const next = prev.map(c => (c.id === id ? { ...c, ...sanitized } : c))
+      return next.sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    })
+  }
+
+  const deleteCategory = async (id) => {
+    const target = categories.find(c => c.id === id)
+    if (!target) return { success: false, error: 'Category not found' }
+
+    // Check if any product is assigned to this category
+    const assignedProducts = products.filter(p => {
+      return (
+        p.category_id === id ||
+        (p.category && p.category.toLowerCase() === target.name.toLowerCase()) ||
+        (p.category && p.category.toLowerCase() === target.slug.toLowerCase())
+      )
+    })
+
+    if (assignedProducts.length > 0) {
+      return {
+        success: false,
+        error: `Cannot delete "${target.name}": ${assignedProducts.length} product(s) are currently assigned to it. Please reassign those products first.`
+      }
+    }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('categories').delete().eq('id', id)
+      } catch (err) {
+        console.warn('Supabase category delete error:', err)
+      }
+    }
+
+    setCategories(prev => prev.filter(c => c.id !== id))
+    return { success: true }
+  }
+
   // Product Operations
   const addProduct = async (productData) => {
     const section = productData.display_section || 'grid'
     const sortOrder = parseInt(productData.sort_order) || 0
+    const inStock = productData.in_stock !== false && productData.in_stock !== 'false'
+    const stockUnits = parseInt(productData.stock) >= 0 ? parseInt(productData.stock) : 10
+
+    let categoryId = productData.category_id || null
+    let categoryName = productData.category || ''
+    if (categoryId && !categoryName) {
+      const matchCat = categories.find(c => c.id === categoryId)
+      if (matchCat) categoryName = matchCat.name
+    } else if (categoryName && !categoryId) {
+      const matchCat = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase() || c.slug.toLowerCase() === categoryName.toLowerCase())
+      if (matchCat) categoryId = matchCat.id
+    }
 
     const newProduct = {
       id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'prod-' + Date.now(),
       created_at: new Date().toISOString(),
-      in_stock: true,
-      stock: parseInt(productData.stock) || 0,
+      ...productData,
+      in_stock: inStock,
+      stock: stockUnits,
       price: parseFloat(productData.price) || 0,
       display_section: section,
       sort_order: sortOrder,
-      ...productData,
+      category_id: categoryId,
+      category: categoryName,
     }
 
     // Resolve any placement collisions first
@@ -366,22 +578,27 @@ export function AppProvider({ children }) {
         if (!error && data && data[0]) {
           setProducts([data[0], ...resolvedList])
           return data[0]
-        } else if (error && error.code === 'PGRST204') {
-          // If display_section/sort_order column does not exist yet on Supabase, insert without them
-          const { display_section, sort_order, ...fallbackProduct } = newProduct
-          const { data: fbData } = await supabase.from('products').insert([fallbackProduct]).select()
-          const returned = fbData?.[0] ? { ...fbData[0], display_section: section, sort_order: sortOrder } : newProduct
-          setProducts([returned, ...resolvedList])
-          return returned
+        } else if (error) {
+          // If columns don't exist yet on Supabase (e.g. display_section, sort_order, category_id), insert with supported core fields
+          const { display_section, sort_order, category_id, ...fallbackProduct } = newProduct
+          const { data: fbData, error: fbErr } = await supabase.from('products').insert([fallbackProduct]).select()
+          if (!fbErr && fbData?.[0]) {
+            const returned = { ...fbData[0], display_section: section, sort_order: sortOrder, category_id: categoryId }
+            setProducts([returned, ...resolvedList])
+            return returned
+          } else {
+            console.warn('Supabase product insert notice (persisting locally):', error.message || fbErr?.message)
+          }
         }
       } catch (err) {
-        console.error('Supabase product insert error:', err)
+        console.warn('Supabase product insert error, saved locally:', err)
       }
     }
 
     setProducts([newProduct, ...resolvedList])
     return newProduct
   }
+
 
   const updateProduct = async (id, updates) => {
     const sanitized = {
@@ -531,6 +748,24 @@ export function AppProvider({ children }) {
     }
   }
 
+  const deleteOrder = async (orderId) => {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const client = supabase || supabaseAnon
+        const { error } = await client.from('orders').delete().eq('id', orderId)
+        if (error) {
+          console.error('[Supabase] Failed to delete order:', error.message)
+        } else {
+          console.log(`[Supabase] Order #${orderId} deleted successfully`)
+        }
+      } catch (err) {
+        console.error('[Supabase] deleteOrder exception:', err)
+      }
+    }
+
+    setOrders(prev => prev.filter(o => String(o.id) !== String(orderId)))
+  }
+
   // Buyer Profile Operations
   const getBuyerProfile = (userId) => {
     return buyerProfiles[userId] || null
@@ -614,6 +849,11 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider
       value={{
+        categories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        refreshCategories,
         products,
         orders,
         banners,
@@ -630,12 +870,14 @@ export function AppProvider({ children }) {
         resetCatalog,
         createOrder,
         updateOrderStatus,
+        deleteOrder,
         refreshOrders,
         getBuyerProfile,
         saveBuyerProfile,
         updateBanner,
         resetBanner,
         refreshBanners,
+
       }}
     >
       {children}

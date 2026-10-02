@@ -4,7 +4,7 @@ import OrderTable from '../../components/admin/OrderTable'
 import { Search, MessageSquare, Clock, CheckCircle2, RefreshCw } from 'lucide-react'
 
 export default function ManageOrders() {
-  const { orders, updateOrderStatus, refreshOrders } = useApp()
+  const { orders, updateOrderStatus, refreshOrders, deleteOrder } = useApp()
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -133,6 +133,7 @@ export default function ManageOrders() {
       <OrderTable
         orders={filteredOrders}
         onUpdateStatus={(id, status) => updateOrderStatus(id, status)}
+        onDeleteOrder={(id) => deleteOrder(id)}
       />
     </div>
   )

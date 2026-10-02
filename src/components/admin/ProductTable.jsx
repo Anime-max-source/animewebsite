@@ -28,7 +28,15 @@ export default function ProductTable({ products, onEdit, onDelete, onToggleSoldO
             </tr>
           </thead>
           <tbody className="divide-y divide-[#EDEDED] font-normal">
-            {products.map((product) => {
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="px-5 py-12 text-center text-xs text-[#6B7280]">
+                  <p className="font-bold text-sm text-[#111827] mb-1">No products found</p>
+                  <p>Your store catalog is currently empty. Click "+ Add New Product" to add launch inventory.</p>
+                </td>
+              </tr>
+            ) : (
+              products.map((product) => {
               const isSoldOut = !product.in_stock || product.stock <= 0
               return (
                 <tr 
@@ -90,8 +98,9 @@ export default function ProductTable({ products, onEdit, onDelete, onToggleSoldO
 
                   {/* Category / Series */}
                   <td className="px-5 py-3.5">
-                    <CategoryBadge category={product.series || product.category} />
+                    <CategoryBadge category={product.category || product.series || 'General'} />
                   </td>
+
 
                   {/* Edition / Color */}
                   <td className="px-5 py-3.5 whitespace-nowrap text-xs">
@@ -156,7 +165,8 @@ export default function ProductTable({ products, onEdit, onDelete, onToggleSoldO
                   </td>
                 </tr>
               )
-            })}
+            })
+          )}
           </tbody>
         </table>
       </div>

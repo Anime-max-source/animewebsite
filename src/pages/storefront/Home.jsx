@@ -7,7 +7,8 @@ import {
   Sparkle,
   ShoppingBag,
   Check,
-  X
+  X,
+  ArrowRight
 } from '@phosphor-icons/react'
 import { useApp } from '../../context/AppContext'
 import { useCart } from '../../context/CartContext'
@@ -16,12 +17,13 @@ import { handleImageError } from '../../utils/imageFallback'
 import { cldUrl } from '../../lib/cloudinary'
 
 export default function Home() {
-  const { products } = useApp()
+  const { products, categories = [], banners = {} } = useApp()
+  const heroBanner = banners?.hero
   const { addToCart, items } = useCart()
 
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // URL State
+  // URL State — default 'all'
   const activeCategory = searchParams.get('category') || 'all'
   const searchQuery = searchParams.get('q') || ''
 
@@ -56,31 +58,21 @@ export default function Home() {
     setWishlist(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]))
   }
 
-  // Filter Categories
+  // Dynamic Category Pills from categories table, ordered by display_order with 'All' first
   const filterPills = useMemo(() => {
-    const basePills = [
-      { id: 'all', label: 'All' },
-      { id: 'figures', label: 'Figures' },
-      { id: 'posters', label: 'Posters' },
-      { id: 'clothing', label: 'Apparel' },
-      { id: 'accessories', label: 'Accessories' },
-    ]
-    const seriesSet = new Set()
-    products.forEach(p => {
-      const s = p.series || p.category
-      if (s && !['figures', 'posters', 'clothing', 'accessories'].includes(s.toLowerCase())) {
-        seriesSet.add(s)
-      }
-    })
-    const dynamicSeries = Array.from(seriesSet).sort().map(s => ({
-      id: s.toLowerCase(),
-      label: s
+    const allPill = { id: 'all', label: 'All' }
+    const sorted = [...categories].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    const categoryPills = sorted.map(c => ({
+      id: c.slug || c.id,
+      categoryId: c.id,
+      slug: c.slug,
+      label: c.name
     }))
-    return [...basePills, ...dynamicSeries]
-  }, [products])
+    return [allPill, ...categoryPills]
+  }, [categories])
 
   const handleCategoryChange = (catId) => {
-    if (catId === 'all') {
+    if (!catId || catId === 'all') {
       searchParams.delete('category')
     } else {
       searchParams.set('category', catId)
@@ -98,13 +90,38 @@ export default function Home() {
     setSearchParams(searchParams)
   }
 
+  // Selected Category Object
+  const isAll = !activeCategory || activeCategory.toLowerCase() === 'all'
+  const activeCategoryObj = useMemo(() => {
+    if (isAll) return null
+    const lower = activeCategory.toLowerCase()
+    return categories.find(
+      c => (c.slug && c.slug.toLowerCase() === lower) ||
+           (c.id && c.id === activeCategory) ||
+           (c.name && c.name.toLowerCase() === lower)
+    ) || null
+  }, [categories, activeCategory, isAll])
+
   // Filtered & Sorted Catalog
   const filteredCatalog = useMemo(() => {
     return products.filter((item) => {
-      const itemCat = (item.category || '').toLowerCase()
-      const itemSeries = (item.series || '').toLowerCase()
-      const active = activeCategory.toLowerCase()
-      const matchesCat = active === 'all' || itemCat === active || itemSeries === active
+      // Category matching:
+      // When active tab is 'all', skip category filter entirely
+      let matchesCat = isAll
+      if (!matchesCat) {
+        const lowerActive = activeCategory.toLowerCase()
+        const itemCat = (item.category || '').toLowerCase()
+        const itemSeries = (item.series || '').toLowerCase()
+        const itemCatId = item.category_id
+
+        if (activeCategoryObj && itemCatId && itemCatId === activeCategoryObj.id) {
+          matchesCat = true
+        } else if (activeCategoryObj && itemCat === activeCategoryObj.name.toLowerCase()) {
+          matchesCat = true
+        } else if (itemCat === lowerActive || itemSeries === lowerActive) {
+          matchesCat = true
+        }
+      }
 
       const q = searchQuery.toLowerCase().trim()
       const matchesQuery = !q ||
@@ -117,7 +134,10 @@ export default function Home() {
         (item.hw_num && String(item.hw_num).includes(q)) ||
         (item.sort_order && String(item.sort_order).includes(q))
 
-      const matchesStock = !inStockOnly || (item.in_stock && item.stock > 0)
+      // In stock checking: true boolean, 'true' string, or stock count
+      const isInStock = item.in_stock === true || item.in_stock === 'true' || item.in_stock === 1
+      const matchesStock = !inStockOnly || isInStock
+
       return matchesCat && matchesQuery && matchesStock
     }).sort((a, b) => {
       if (sortBy === 'price-low') return a.price - b.price
@@ -129,10 +149,53 @@ export default function Home() {
       if (orderA !== orderB) return orderA - orderB
       return new Date(b.created_at || 0) - new Date(a.created_at || 0)
     })
-  }, [products, activeCategory, searchQuery, inStockOnly, sortBy])
+  }, [products, isAll, activeCategory, activeCategoryObj, searchQuery, inStockOnly, sortBy])
+
 
   return (
     <div className="space-y-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+
+      {/* ── Hero Banner Section (Kinetic Editorial Style) ─────────────── */}
+      {heroBanner && isAll && !searchQuery && (
+        <div className="relative rounded-[16px] overflow-hidden border border-[#E5E5E5] bg-[#F8F8F6] p-6 sm:p-8 flex flex-col justify-between min-h-[220px] sm:min-h-[260px]">
+          <div className="relative z-10 max-w-lg space-y-3">
+            {heroBanner.eyebrow_tag && (
+              <span className="inline-flex items-center px-3 py-1 rounded-[12px] text-xs font-bold bg-[#111111] text-white uppercase tracking-wider font-['Inter']">
+                {heroBanner.eyebrow_tag}
+              </span>
+            )}
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#111111] tracking-tight leading-tight font-['Syne']">
+              {heroBanner.headline || 'GET UP TO 50% OFF'}
+            </h2>
+            {heroBanner.subtext && (
+              <p className="text-sm text-[#6B6B6B] leading-relaxed max-w-md font-['Inter']">
+                {heroBanner.subtext}
+              </p>
+            )}
+            {heroBanner.cta_text && (
+              <div className="pt-2">
+                <a
+                  href={heroBanner.cta_link || '#catalog-view'}
+                  className="sf-btn-primary inline-flex items-center gap-2"
+                >
+                  <span>{heroBanner.cta_text}</span>
+                  <ArrowRight size={16} />
+                </a>
+              </div>
+            )}
+          </div>
+          {heroBanner.image_url && (
+            <div className="absolute right-0 bottom-0 top-0 w-1/2 sm:w-5/12 pointer-events-none overflow-hidden flex items-end justify-end opacity-40 sm:opacity-90">
+              <img
+                src={heroBanner.image_url}
+                alt={heroBanner.headline || 'Hero promotional banner'}
+                className="w-full h-full object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#F8F8F6] via-[#F8F8F6]/40 to-transparent" />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Page Header: Title + Filter Pills + Search/Filters ─────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-w-0 w-full">
@@ -223,9 +286,10 @@ export default function Home() {
               All Products ({filteredCatalog.length})
             </h2>
             <p className="text-sm text-[#6B6B6B] mt-0.5">
-              {activeCategory === 'all' ? 'Showing all items' : `Category: ${activeCategory}`}
+              {isAll ? 'Showing all items' : `Category: ${activeCategoryObj?.name || activeCategory}`}
               {searchQuery && ` · "${searchQuery}"`}
             </p>
+
           </div>
 
           {searchQuery && (

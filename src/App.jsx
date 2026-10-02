@@ -23,6 +23,7 @@ import OrderHistory from './pages/account/OrderHistory'
 import AdminLogin from './pages/admin/AdminLogin'
 import Dashboard from './pages/admin/Dashboard'
 import ManageProducts from './pages/admin/ManageProducts'
+import ManageCategories from './pages/admin/ManageCategories'
 import ManageOrders from './pages/admin/ManageOrders'
 import ManageBanners from './pages/admin/ManageBanners'
 import Customers from './pages/admin/Customers'
@@ -50,6 +51,7 @@ export default function App() {
           <Routes>
             <Route path="/admin" element={<ProtectedAdminRoute><Dashboard /></ProtectedAdminRoute>} />
             <Route path="/admin/products" element={<ProtectedAdminRoute><ManageProducts /></ProtectedAdminRoute>} />
+            <Route path="/admin/categories" element={<ProtectedAdminRoute><ManageCategories /></ProtectedAdminRoute>} />
             <Route path="/admin/orders" element={<ProtectedAdminRoute><ManageOrders /></ProtectedAdminRoute>} />
             <Route path="/admin/content" element={<ProtectedAdminRoute><ManageBanners /></ProtectedAdminRoute>} />
             <Route path="/admin/customers" element={<ProtectedAdminRoute><Customers /></ProtectedAdminRoute>} />
@@ -58,6 +60,7 @@ export default function App() {
             <Route path="/admin/login/*" element={<AdminLogin />} />
           </Routes>
         </AdminLayout>
+
       ) : (
         /* ─────────────────────────────────────────────────────────────────
            Storefront Layout: Kinetic Editorial Design System

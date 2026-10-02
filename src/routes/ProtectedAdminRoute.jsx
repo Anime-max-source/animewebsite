@@ -42,14 +42,14 @@ function ClerkProtectedAdmin({ children }) {
 export default function ProtectedAdminRoute({ children }) {
   const { mockUser } = useApp()
 
+  // Allow local owner session if authenticated as owner
+  if (mockUser && mockUser.role === 'owner') {
+    return children
+  }
+
   // If live Clerk is enabled, strictly delegate to ClerkProtectedAdmin component
   if (isClerkConfigured) {
     return <ClerkProtectedAdmin>{children}</ClerkProtectedAdmin>
-  }
-
-  // Fallback demo/dev mode only when Clerk is unconfigured
-  if (mockUser && mockUser.role === 'owner') {
-    return children
   }
 
   return <Navigate to="/admin/login" replace />

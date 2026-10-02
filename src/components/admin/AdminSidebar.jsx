@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { 
   LayoutDashboard, 
   Package, 
+  Tags,
   ShoppingBag, 
   Users, 
   Sparkles,
@@ -44,10 +45,16 @@ export default function AdminSidebar({
       icon: Package,
     },
     {
+      name: 'Categories',
+      path: '/admin/categories',
+      icon: Tags,
+    },
+    {
       name: 'Customers',
       path: '/admin/customers',
       icon: Users,
     },
+
     {
       name: 'Homepage Content',
       path: '/admin/content',

@@ -41,183 +41,202 @@ export default function Dashboard() {
   const [activeMenu, setActiveMenu] = useState(null)
   const [isFulfillmentModalOpen, setIsFulfillmentModalOpen] = useState(false)
 
-  // Real-time store order stats
-  const livePendingCount = orders.filter((o) => o.status === 'pending').length
-  const liveConfirmedCount = orders.filter((o) => o.status === 'payment_confirmed').length
-  const liveShippedCount = orders.filter((o) => o.status === 'shipped').length
-  const liveTotalOrders = orders.length
+  // Live date range & metrics calculation derived directly from store orders & products
+  const {
+    activePeriod,
+    bestSellers,
+    pendingPct,
+    confirmedPct,
+    shippedPct,
+    totalStatusOrders
+  } = useMemo(() => {
+    const daysMap = { '7d': 7, '30d': 30, '90d': 90 }
+    const days = daysMap[dateRangeKey] || 30
+    const now = Date.now()
+    const msInDay = 24 * 60 * 60 * 1000
 
-  // Date Range configurations
-  const reportingPeriods = {
-    '7d': {
-      label: 'Last 7 days',
-      dateRangeDisplay: 'Jan 25 – Feb 1, 2026',
-      revenue: 118400,
-      revenueDelta: '+15.2%',
-      isRevenueDeltaPos: true,
-      ordersCount: 42 + liveTotalOrders,
-      ordersDelta: '+8.4%',
-      isOrdersDeltaPos: true,
-      newCustomers: 26,
-      customersDelta: '+14.1%',
-      isCustomersDeltaPos: true,
-      pendingCount: livePendingCount > 0 ? livePendingCount : 5,
-      pendingDelta: livePendingCount > 3 ? '+2 pending' : '-1 pending',
-      isPendingBacklog: livePendingCount > 5,
-      chartData: [
-        { date: 'Jan 26', current: 14200, previous: 12100 },
-        { date: 'Jan 27', current: 16800, previous: 14500 },
-        { date: 'Jan 28', current: 15400, previous: 13900 },
-        { date: 'Jan 29', current: 18200, previous: 15200 },
-        { date: 'Jan 30', current: 17100, previous: 16000 },
-        { date: 'Jan 31', current: 22400, previous: 18400 },
-        { date: 'Feb 1', current: 24300, previous: 19200 },
-      ],
-      orderStatusDistribution: {
-        pending: Math.max(livePendingCount, 6),
-        confirmed: Math.max(liveConfirmedCount, 22),
-        shipped: Math.max(liveShippedCount, 14),
-      },
-      busiestDayData: [
-        { day: 'Sun', orders: 12 },
-        { day: 'Mon', orders: 15 },
-        { day: 'Tue', orders: 14 },
-        { day: 'Wed', orders: 18 },
-        { day: 'Thu', orders: 20 },
-        { day: 'Fri', orders: 38, isPeak: true },
-        { day: 'Sat', orders: 28 },
-      ],
-      fulfillmentRate: 85
-    },
-    '30d': {
-      label: 'Last 30 days',
-      dateRangeDisplay: 'Jan 1 – Feb 1, 2026',
-      revenue: 446700,
-      revenueDelta: '+24.4%',
-      isRevenueDeltaPos: true,
-      ordersCount: 148 + liveTotalOrders,
-      ordersDelta: '+12.5%',
-      isOrdersDeltaPos: true,
-      newCustomers: 86,
-      customersDelta: '+18.2%',
-      isCustomersDeltaPos: true,
-      pendingCount: livePendingCount > 0 ? livePendingCount : 12,
-      pendingDelta: '+4 pending',
-      isPendingBacklog: true,
-      chartData: [
-        { date: 'Jan 5', current: 52000, previous: 44000 },
-        { date: 'Jan 10', current: 68000, previous: 55000 },
-        { date: 'Jan 15', current: 74000, previous: 61000 },
-        { date: 'Jan 20', current: 81000, previous: 69000 },
-        { date: 'Jan 25', current: 92000, previous: 73000 },
-        { date: 'Jan 30', current: 104000, previous: 82000 },
-      ],
-      orderStatusDistribution: {
-        pending: Math.max(livePendingCount, 18),
-        confirmed: Math.max(liveConfirmedCount, 78),
-        shipped: Math.max(liveShippedCount, 52),
-      },
-      busiestDayData: [
-        { day: 'Sun', orders: 16 },
-        { day: 'Mon', orders: 21 },
-        { day: 'Tue', orders: 19 },
-        { day: 'Wed', orders: 24 },
-        { day: 'Thu', orders: 26 },
-        { day: 'Fri', orders: 38, isPeak: true },
-        { day: 'Sat', orders: 31 },
-      ],
-      fulfillmentRate: 82
-    },
-    '90d': {
-      label: 'Last 90 days',
-      dateRangeDisplay: 'Nov 1, 2025 – Feb 1, 2026',
-      revenue: 1285400,
-      revenueDelta: '+31.0%',
-      isRevenueDeltaPos: true,
-      ordersCount: 420 + liveTotalOrders,
-      ordersDelta: '+22.4%',
-      isOrdersDeltaPos: true,
-      newCustomers: 245,
-      customersDelta: '+26.8%',
-      isCustomersDeltaPos: true,
-      pendingCount: livePendingCount > 0 ? livePendingCount : 14,
-      pendingDelta: '+2 pending',
-      isPendingBacklog: true,
-      chartData: [
-        { date: 'Nov 15', current: 160000, previous: 120000 },
-        { date: 'Dec 1', current: 210000, previous: 155000 },
-        { date: 'Dec 15', current: 280000, previous: 195000 },
-        { date: 'Jan 1', current: 310000, previous: 240000 },
-        { date: 'Jan 15', current: 380000, previous: 290000 },
-        { date: 'Feb 1', current: 446700, previous: 350000 },
-      ],
-      orderStatusDistribution: {
-        pending: Math.max(livePendingCount, 24),
-        confirmed: Math.max(liveConfirmedCount, 210),
-        shipped: Math.max(liveShippedCount, 186),
-      },
-      busiestDayData: [
-        { day: 'Sun', orders: 48 },
-        { day: 'Mon', orders: 55 },
-        { day: 'Tue', orders: 51 },
-        { day: 'Wed', orders: 68 },
-        { day: 'Thu', orders: 74 },
-        { day: 'Fri', orders: 112, isPeak: true },
-        { day: 'Sat', orders: 88 },
-      ],
-      fulfillmentRate: 86
+    // Filter orders within selected period
+    const currentOrders = orders.filter((o) => {
+      if (!o.created_at) return true
+      const orderTime = new Date(o.created_at).getTime()
+      return (now - orderTime) <= (days * msInDay)
+    })
+
+    // Filter orders within preceding period for comparative deltas
+    const previousOrders = orders.filter((o) => {
+      if (!o.created_at) return false
+      const orderTime = new Date(o.created_at).getTime()
+      const diff = now - orderTime
+      return diff > (days * msInDay) && diff <= (days * 2 * msInDay)
+    })
+
+    // Revenue calculation (excluding cancelled orders)
+    const currentRevenue = currentOrders
+      .filter((o) => o.status !== 'cancelled')
+      .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+
+    const previousRevenue = previousOrders
+      .filter((o) => o.status !== 'cancelled')
+      .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
+
+    const currentOrdersCount = currentOrders.length
+    const previousOrdersCount = previousOrders.length
+
+    // Unique customer calculation
+    const currentCustomers = new Set(
+      currentOrders.map((o) => o.user_id || o.buyer_phone || o.buyer_whatsapp || o.buyer_name).filter(Boolean)
+    ).size
+    const previousCustomers = new Set(
+      previousOrders.map((o) => o.user_id || o.buyer_phone || o.buyer_whatsapp || o.buyer_name).filter(Boolean)
+    ).size
+
+    // Fulfillment stage counts
+    const pendingCount = currentOrders.filter((o) => o.status === 'pending' || o.status === 'qr_sent').length
+    const confirmedCount = currentOrders.filter((o) => o.status === 'payment_confirmed').length
+    const shippedCount = currentOrders.filter((o) => o.status === 'shipped').length
+    const totalStatusOrders = pendingCount + confirmedCount + shippedCount
+
+    const calcDelta = (curr, prev) => {
+      if (prev === 0) {
+        return { delta: curr > 0 ? '+100%' : '+0%', isPos: true }
+      }
+      const pct = Math.round(((curr - prev) / prev) * 100)
+      return { delta: `${pct >= 0 ? '+' : ''}${pct}%`, isPos: pct >= 0 }
     }
-  }
 
-  const activePeriod = reportingPeriods[dateRangeKey] || reportingPeriods['30d']
+    const revDelta = calcDelta(currentRevenue, previousRevenue)
+    const ordDelta = calcDelta(currentOrdersCount, previousOrdersCount)
+    const custDelta = calcDelta(currentCustomers, previousCustomers)
 
-  // Segmented Bar Calculation
-  const totalStatusOrders = 
-    activePeriod.orderStatusDistribution.pending +
-    activePeriod.orderStatusDistribution.confirmed +
-    activePeriod.orderStatusDistribution.shipped
+    // Dynamic timeline chart buckets
+    const numBuckets = dateRangeKey === '7d' ? 7 : 6
+    const bucketDuration = (days * msInDay) / numBuckets
+    const chartData = []
 
-  const pendingPct = Math.round((activePeriod.orderStatusDistribution.pending / totalStatusOrders) * 100)
-  const confirmedPct = Math.round((activePeriod.orderStatusDistribution.confirmed / totalStatusOrders) * 100)
-  const shippedPct = 100 - pendingPct - confirmedPct
+    for (let i = numBuckets - 1; i >= 0; i--) {
+      const bucketEnd = now - i * bucketDuration
+      const bucketStart = bucketEnd - bucketDuration
+      const labelDate = new Date(bucketEnd)
+      const label = labelDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      })
 
-  // Best Selling Products List (curated from store catalog)
-  const bestSellers = useMemo(() => {
-    // Generate realistic best seller metrics mapped to actual store catalog
-    const baseList = [
-      { id: 'HW-024', name: 'Track Ripper (Silver Edition)', defaultSold: 312, defaultPrice: 249 },
-      { id: 'HW-035', name: 'Wattzup Hypercar (Gold Edition)', defaultSold: 284, defaultPrice: 299 },
-      { id: 'HW-031', name: 'LA Leibre Concept (White)', defaultSold: 246, defaultPrice: 249 },
-      { id: 'HW-039', name: 'Roller Toaster (Experimotors)', defaultSold: 198, defaultPrice: 249 },
-      { id: 'HW-044', name: 'Mod Speeder Track Special', defaultSold: 172, defaultPrice: 279 },
-      { id: 'HW-048', name: 'Glory Chaser Racing Model', defaultSold: 154, defaultPrice: 299 },
-      { id: 'HW-052', name: 'Dimachinni Veloce Supercar', defaultSold: 139, defaultPrice: 319 },
-    ]
+      const bucketCurrRev = currentOrders
+        .filter((o) => {
+          if (o.status === 'cancelled') return false
+          const t = new Date(o.created_at || now).getTime()
+          return t >= bucketStart && t <= bucketEnd
+        })
+        .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
 
-    return baseList.map((item, index) => {
-      // Cross reference with actual product if exists in catalog
-      const catalogMatch = products.find((p) => 
-        p.id?.toLowerCase() === item.id.toLowerCase() || 
-        p.name?.toLowerCase().includes(item.name.split(' ')[0].toLowerCase())
-      )
+      const bucketPrevRev = previousOrders
+        .filter((o) => {
+          if (o.status === 'cancelled') return false
+          const t = new Date(o.created_at || 0).getTime()
+          const prevStart = bucketStart - (days * msInDay)
+          const prevEnd = bucketEnd - (days * msInDay)
+          return t >= prevStart && t <= prevEnd
+        })
+        .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0)
 
-      const finalName = catalogMatch?.name || item.name
-      const finalImage = catalogMatch?.image_url || 'https://164custom.com/images/HW/10590/th.jpg'
-      const finalPrice = catalogMatch?.price || item.defaultPrice
-      const inStock = catalogMatch ? (catalogMatch.in_stock && catalogMatch.stock > 0) : true
-      const sold = item.defaultSold
-      const revenue = sold * finalPrice
+      chartData.push({
+        date: label,
+        current: bucketCurrRev,
+        previous: bucketPrevRev
+      })
+    }
 
-      return {
-        id: item.id,
-        name: finalName,
-        image_url: finalImage,
-        sold,
-        revenue,
-        inStock
+    // Busiest day analysis (Sun–Sat)
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 }
+    currentOrders.forEach((o) => {
+      const d = new Date(o.created_at || now).getDay()
+      const dayName = daysOfWeek[d]
+      if (dayCounts[dayName] !== undefined) {
+        dayCounts[dayName]++
       }
     })
-  }, [products])
+
+    const maxDayOrders = Math.max(...Object.values(dayCounts), 0)
+    const busiestDayData = daysOfWeek.map((day) => ({
+      day,
+      orders: dayCounts[day],
+      isPeak: maxDayOrders > 0 && dayCounts[day] === maxDayOrders
+    }))
+
+    // Fulfillment Rate
+    const fulfillmentRate = totalStatusOrders > 0
+      ? Math.round((shippedCount / totalStatusOrders) * 100)
+      : 100
+
+    const startRange = new Date(now - days * msInDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const endRange = new Date(now).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+    const activePeriod = {
+      label: dateRangeKey === '7d' ? 'Last 7 days' : dateRangeKey === '30d' ? 'Last 30 days' : 'Last 90 days',
+      dateRangeDisplay: `${startRange} – ${endRange}`,
+      revenue: currentRevenue,
+      revenueDelta: revDelta.delta,
+      isRevenueDeltaPos: revDelta.isPos,
+      ordersCount: currentOrdersCount,
+      ordersDelta: ordDelta.delta,
+      isOrdersDeltaPos: ordDelta.isPos,
+      newCustomers: currentCustomers,
+      customersDelta: custDelta.delta,
+      isCustomersDeltaPos: custDelta.isPos,
+      pendingCount,
+      pendingDelta: pendingCount === 0 ? 'All clear' : `${pendingCount} pending`,
+      isPendingBacklog: pendingCount > 5,
+      chartData,
+      orderStatusDistribution: {
+        pending: pendingCount,
+        confirmed: confirmedCount,
+        shipped: shippedCount
+      },
+      busiestDayData,
+      fulfillmentRate
+    }
+
+    const pendingPct = totalStatusOrders > 0 ? Math.round((pendingCount / totalStatusOrders) * 100) : 0
+    const confirmedPct = totalStatusOrders > 0 ? Math.round((confirmedCount / totalStatusOrders) * 100) : 0
+    const shippedPct = totalStatusOrders > 0 ? 100 - pendingPct - confirmedPct : 0
+
+    // Best Selling Products dynamically calculated from actual orders items
+    const salesMap = {}
+    currentOrders.forEach((o) => {
+      if (o.status === 'cancelled') return
+      (o.items || []).forEach((item) => {
+        const id = item.id || item.product_id || item.name
+        if (!salesMap[id]) {
+          const catalogMatch = products.find((p) => p.id === id || p.name?.toLowerCase() === item.name?.toLowerCase())
+          salesMap[id] = {
+            id,
+            name: catalogMatch?.name || item.name || 'Anime Product',
+            image_url: catalogMatch?.image_url || item.image_url || '',
+            sold: 0,
+            revenue: 0,
+            inStock: catalogMatch ? (catalogMatch.in_stock && catalogMatch.stock > 0) : true
+          }
+        }
+        const qty = Number(item.qty) || 1
+        const price = Number(item.price) || 0
+        salesMap[id].sold += qty
+        salesMap[id].revenue += price * qty
+      })
+    })
+
+    const bestSellers = Object.values(salesMap).sort((a, b) => b.sold - a.sold)
+
+    return {
+      activePeriod,
+      bestSellers,
+      pendingPct,
+      confirmedPct,
+      shippedPct,
+      totalStatusOrders
+    }
+  }, [orders, products, dateRangeKey])
 
   const toggleMenu = (menuName) => {
     setActiveMenu((prev) => (prev === menuName ? null : menuName))
@@ -429,7 +448,7 @@ export default function Dashboard() {
                   tickLine={false} 
                   axisLine={false}
                   tick={{ fill: '#6B7280', fontSize: 11 }}
-                  tickFormatter={(val) => `₹${val / 1000}k`}
+                  tickFormatter={(val) => val === 0 ? '₹0' : (val >= 1000 ? `₹${Math.round(val / 1000)}k` : `₹${val}`)}
                   dx={-5}
                 />
                 <Tooltip 
@@ -587,7 +606,7 @@ export default function Dashboard() {
                     // Label peak bar with exact order count above the bar
                     label={({ x, y, width, value, index }) => {
                       const item = activePeriod.busiestDayData[index]
-                      if (!item?.isPeak) return null
+                      if (!item?.isPeak || item.orders === 0) return null
                       return (
                         <g>
                           <rect
@@ -625,8 +644,8 @@ export default function Dashboard() {
             </div>
 
             <div className="text-[11px] text-[#6B7280] pt-1 border-t border-[#EDEDED] flex items-center justify-between">
-              <span>Peak Day: <strong className="text-[#111827]">Friday</strong></span>
-              <span className="text-[#3B82F6] font-semibold">Weekend Surge</span>
+              <span>Peak Day: <strong className="text-[#111827]">{activePeriod.busiestDayData.find(d => d.isPeak)?.day || 'None yet'}</strong></span>
+              <span className="text-[#3B82F6] font-semibold">{totalStatusOrders > 0 ? `${activePeriod.busiestDayData.find(d => d.isPeak)?.orders || 0} Orders` : 'No Activity'}</span>
             </div>
           </div>
 
@@ -684,7 +703,7 @@ export default function Dashboard() {
 
               {/* Caption */}
               <p className="text-xs font-medium text-[#6B7280] text-center mt-1">
-                On track for 90% target
+                {totalStatusOrders > 0 ? (activePeriod.fulfillmentRate >= 90 ? 'Exceeding 90% SLA target' : 'Working towards 90% SLA target') : 'No orders awaiting fulfillment'}
               </p>
 
               {/* Show Details Button */}
@@ -744,7 +763,18 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#EDEDED] font-normal">
-              {bestSellers.map((item) => (
+              {bestSellers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-12 text-center text-xs text-[#6B7280]">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto text-[#9CA3AF] mb-3">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                    <p className="font-bold text-sm text-[#111827] mb-1">No sales recorded yet</p>
+                    <p>Top performing anime products will automatically appear here once customer orders are placed.</p>
+                  </td>
+                </tr>
+              ) : (
+                bestSellers.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/70 transition-colors">
                   {/* ID */}
                   <td className="px-5 py-3.5 font-mono text-xs font-semibold text-[#6B7280]">
@@ -789,7 +819,7 @@ export default function Dashboard() {
                     )}
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

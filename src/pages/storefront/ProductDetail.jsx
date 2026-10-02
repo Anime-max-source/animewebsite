@@ -45,7 +45,7 @@ export default function ProductDetail() {
     )
   }
 
-  const isSoldOut = !product.in_stock || product.stock <= 0
+  const isSoldOut = product.in_stock === false || (product.stock !== undefined && product.stock !== null && product.stock !== '' && Number(product.stock) <= 0)
   const cartItem = items.find((i) => i.id === product.id)
   const isAlreadyInCart = Boolean(cartItem)
 

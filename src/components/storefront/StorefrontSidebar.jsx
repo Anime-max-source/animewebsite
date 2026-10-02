@@ -22,7 +22,7 @@ import AnimaxLogo from './AnimaxLogo'
 import { cldUrl } from '../../lib/cloudinary'
 
 export default function StorefrontSidebar() {
-  const { mockUser, setMockUser, logout, orders, products } = useApp()
+  const { mockUser, setMockUser, logout, orders, products, categories = [] } = useApp()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -56,15 +56,30 @@ export default function StorefrontSidebar() {
     setModalType(null)
   }
 
+  // Category Icon Resolver
+  const getCategoryIcon = (slug, name) => {
+    const s = (slug || name || '').toLowerCase()
+    if (s.includes('figure') || s.includes('statue')) return Cube
+    if (s.includes('poster') || s.includes('art') || s.includes('wall')) return PhImage
+    if (s.includes('cloth') || s.includes('apparel') || s.includes('wear') || s.includes('hoodie')) return TShirt
+    if (s.includes('access') || s.includes('keychain') || s.includes('toy') || s.includes('car')) return Diamond
+    return Sparkle
+  }
+
   // Categories config — Phosphor icons (24px)
-  const navCategories = [
-    { name: 'Popular Products', query: 'category=figures', icon: Fire },
-    { name: 'Explore New', query: '', icon: Sparkle, isExplore: true },
-    { name: 'Figures & Statues', query: 'category=figures', icon: Cube },
-    { name: 'Posters & Wall Art', query: 'category=posters', icon: PhImage },
-    { name: 'Apparel', query: 'category=clothing', icon: TShirt },
-    { name: 'Accessories', query: 'category=accessories', icon: Diamond },
-  ]
+  const navCategories = React.useMemo(() => {
+    const top = [
+      { name: 'Popular Products', query: 'category=anime-figures', icon: Fire },
+      { name: 'Explore New', query: '', icon: Sparkle, isExplore: true },
+    ]
+    const sorted = [...categories].sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+    const dynamicCats = sorted.map(c => ({
+      name: c.name,
+      query: `category=${c.slug || c.id}`,
+      icon: getCategoryIcon(c.slug, c.name)
+    }))
+    return [...top, ...dynamicCats]
+  }, [categories])
 
   const currentSearch = location.search
 
@@ -74,6 +89,7 @@ export default function StorefrontSidebar() {
     }
     return currentSearch.includes(cat.query)
   }
+
 
   const isBuyerSignedIn = mockUser && mockUser.role !== 'guest'
   const myOrders = isBuyerSignedIn && mockUser?.id

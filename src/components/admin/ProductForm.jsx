@@ -1,24 +1,31 @@
 import React, { useState, useRef, useMemo } from 'react'
-import { Sparkles, AlertCircle, Upload, Loader2, X, Link as LinkIcon } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
+import { Sparkles, AlertCircle, Upload, Loader2, X, Link as LinkIcon, Check } from 'lucide-react'
+import { useApp, generateSlug } from '../../context/AppContext'
 import { uploadImage, isCloudinaryConfigured, PRESETS } from '../../lib/cloudinary'
 
 export default function ProductForm({ initialProduct = null, onSubmit, onCancel, isSubmitting = false }) {
-  const { products = [] } = useApp()
+  const { products = [], categories = [] } = useApp()
   const fileInputRef = useRef(null)
+
+  // Find initial category ID
+  const defaultCategory = categories.find(
+    c => c.id === initialProduct?.category_id || 
+         c.name.toLowerCase() === (initialProduct?.category || '').toLowerCase()
+  ) || categories[0]
 
   const [formData, setFormData] = useState({
     name: initialProduct?.name || '',
     description: initialProduct?.description || '',
-    price: initialProduct?.price || '',
-    category: initialProduct?.category || 'HW Mainline',
+    price: initialProduct?.price !== undefined ? initialProduct.price : '',
+    category_id: initialProduct?.category_id || defaultCategory?.id || '',
+    category: initialProduct?.category || defaultCategory?.name || '',
     series: initialProduct?.series || '',
     edition: initialProduct?.edition || '',
     color: initialProduct?.color || '',
     hw_num: initialProduct?.hw_num !== undefined ? initialProduct.hw_num : '',
     image_url: initialProduct?.image_url || '',
     stock: initialProduct?.stock !== undefined ? initialProduct.stock : 10,
-    in_stock: initialProduct?.in_stock !== undefined ? initialProduct.in_stock : true,
+    in_stock: initialProduct?.in_stock !== undefined ? Boolean(initialProduct.in_stock) : true,
     display_section: initialProduct?.display_section || 'grid',
     sort_order: initialProduct?.sort_order !== undefined ? initialProduct.sort_order : 0,
   })
@@ -87,7 +94,6 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
       setUploadError(err.message)
     } finally {
       setIsUploading(false)
-      // Reset file input so the same file can be re-selected if needed
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -107,7 +113,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (isUploading) return // don't submit while upload is in progress
+    if (isUploading) return
     const errs = validate()
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
@@ -119,21 +125,29 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
       ? parseInt(formData.sort_order)
       : (hwParsed !== undefined ? hwParsed : 0)
 
+    const selectedCat = categories.find(c => c.id === formData.category_id || c.name === formData.category)
+    const catId = selectedCat?.id || formData.category_id || null
+    const catName = selectedCat?.name || formData.category || 'General'
+    const catSlug = selectedCat?.slug || generateSlug(catName)
+
     onSubmit({
       ...formData,
-      category: formData.series || formData.category,
+      category_id: catId,
+      category: catName,
+      category_slug: catSlug,
       price: parseFloat(formData.price),
       stock: parseInt(formData.stock) || 0,
+      in_stock: Boolean(formData.in_stock),
       hw_num: hwParsed,
       sort_order: sortOrderParsed,
     })
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 font-sans text-[#111827]">
       {/* Product Name */}
       <div>
-        <label className="block text-xs font-semibold text-slate-300 mb-1">
+        <label className="block text-xs font-semibold text-[#111827] mb-1.5">
           Product Title <span className="text-rose-500">*</span>
         </label>
         <input
@@ -141,97 +155,45 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
           name="name"
           value={formData.name}
           onChange={handleChange}
-          placeholder="Enter product title..."
-          className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+          placeholder="e.g. Gojo Satoru 1/7 Scale Shibuya Arc Figure"
+          className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
         />
         {errors.name && (
-          <p className="text-rose-400 text-xs mt-1 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> {errors.name}
+          <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1 font-medium">
+            <AlertCircle className="w-3.5 h-3.5" /> {errors.name}
           </p>
         )}
-      </div>
-
-      {/* HW# and Series */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Hot Wheels Collector # (HW#)
-          </label>
-          <input
-            type="number"
-            name="hw_num"
-            min="1"
-            value={formData.hw_num}
-            onChange={handleChange}
-            placeholder="e.g. 24, 89, 160"
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Series
-          </label>
-          <input
-            type="text"
-            name="series"
-            value={formData.series}
-            onChange={handleChange}
-            placeholder="e.g. HW J-Imports, Compact Kings"
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
-          />
-        </div>
-      </div>
-
-      {/* Edition and Color */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Edition
-          </label>
-          <input
-            type="text"
-            name="edition"
-            value={formData.edition}
-            onChange={handleChange}
-            placeholder="e.g. ZAMAC, Spectraflame Orange"
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Color
-          </label>
-          <input
-            type="text"
-            name="color"
-            value={formData.color}
-            onChange={handleChange}
-            placeholder="e.g. Orange, Metallic Blue"
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
-          />
-        </div>
       </div>
 
       {/* Category & Price */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
+          <label className="block text-xs font-semibold text-[#111827] mb-1.5">
             Category <span className="text-rose-500">*</span>
           </label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            placeholder="Category or Series"
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
-          />
+          <select
+            name="category_id"
+            value={formData.category_id || ''}
+            onChange={(e) => {
+              const selected = categories.find(c => c.id === e.target.value)
+              setFormData(prev => ({
+                ...prev,
+                category_id: e.target.value,
+                category: selected ? selected.name : prev.category
+              }))
+            }}
+            className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] cursor-pointer"
+          >
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
+          <label className="block text-xs font-semibold text-[#111827] mb-1.5">
             Price (₹ INR) <span className="text-rose-500">*</span>
           </label>
           <input
@@ -241,22 +203,22 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
             step="1"
             value={formData.price}
             onChange={handleChange}
-            placeholder="Price in ₹"
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+            placeholder="e.g. 1499"
+            className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
           />
           {errors.price && (
-            <p className="text-rose-400 text-xs mt-1 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3" /> {errors.price}
+            <p className="text-rose-500 text-xs mt-1.5 flex items-center gap-1 font-medium">
+              <AlertCircle className="w-3.5 h-3.5" /> {errors.price}
             </p>
           )}
         </div>
       </div>
 
-      {/* Stock and In Stock Toggle */}
+      {/* Stock and In-Stock Toggle */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">
-            Initial Stock Units
+          <label className="block text-xs font-semibold text-[#111827] mb-1.5">
+            Inventory Units
           </label>
           <input
             type="number"
@@ -264,30 +226,75 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
             min="0"
             value={formData.stock}
             onChange={handleChange}
-            className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+            className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
           />
         </div>
 
-        <div className="pt-5">
-          <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer bg-[#121624] p-2.5 rounded-xl border border-slate-700">
+        <div className="pt-0 sm:pt-6">
+          <label className="flex items-center gap-2.5 text-xs text-[#111827] font-semibold cursor-pointer bg-[#F5F6F8] p-2.5 rounded-xl border border-[#EDEDED] hover:bg-gray-100 transition-colors">
             <input
               type="checkbox"
               name="in_stock"
-              checked={formData.in_stock}
+              checked={Boolean(formData.in_stock)}
               onChange={handleChange}
-              className="rounded bg-slate-800 border-slate-600 text-[#ff3366] focus:ring-0 w-4 h-4"
+              className="rounded border-[#EDEDED] text-[#3B82F6] focus:ring-[#3B82F6] w-4 h-4 accent-[#3B82F6]"
             />
-            <span className="font-semibold">Mark as In-Stock on Storefront</span>
+            <span>Mark as In-Stock on Storefront</span>
           </label>
         </div>
       </div>
 
+      {/* Series, Edition, Color (Optional Collector Meta) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-semibold text-[#111827] mb-1.5">
+            Anime / Series
+          </label>
+          <input
+            type="text"
+            name="series"
+            value={formData.series}
+            onChange={handleChange}
+            placeholder="e.g. Jujutsu Kaisen"
+            className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#111827] mb-1.5">
+            Edition / Variant
+          </label>
+          <input
+            type="text"
+            name="edition"
+            value={formData.edition}
+            onChange={handleChange}
+            placeholder="e.g. Limited Scale, Chase"
+            className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-[#111827] mb-1.5">
+            Color / Theme
+          </label>
+          <input
+            type="text"
+            name="color"
+            value={formData.color}
+            onChange={handleChange}
+            placeholder="e.g. Metallic Black"
+            className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+          />
+        </div>
+      </div>
+
       {/* Homepage Placement Control */}
-      <div className="p-3.5 rounded-2xl bg-[#0e1220] border border-slate-700/80 space-y-3">
+      <div className="p-4 rounded-xl bg-[#F5F6F8] border border-[#EDEDED] space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <label className="block text-xs font-semibold text-[#111827] mb-1.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
               <span>Where should this show on the homepage?</span>
             </label>
             <select
@@ -297,7 +304,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
                 handleChange(e)
                 setConfirmReplace(false)
               }}
-              className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+              className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] cursor-pointer"
             >
               <option value="grid">Product Grid (Default)</option>
               <option value="hero">Hero Banner (Single Slot)</option>
@@ -308,7 +315,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
 
           {formData.display_section !== 'grid' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-[#111827] mb-1.5">
                 Sort Order (Lower = Shown First)
               </label>
               <input
@@ -319,7 +326,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
                 value={formData.sort_order}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+                className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
               />
             </div>
           )}
@@ -327,14 +334,14 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
 
         {/* Inline Collision Warning Banner */}
         {collisionWarning && (
-          <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/50 text-amber-200 text-xs space-y-2">
+          <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
             <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
                 {collisionWarning}
               </p>
             </div>
-            <label className="flex items-center gap-2 pt-1 font-bold text-amber-300 cursor-pointer select-none">
+            <label className="flex items-center gap-2 pt-1 font-bold text-amber-950 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={confirmReplace}
@@ -342,12 +349,12 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
                   setConfirmReplace(e.target.checked)
                   if (errors.placement) setErrors(prev => ({ ...prev, placement: undefined }))
                 }}
-                className="rounded bg-slate-800 border-amber-600 text-[#ff3366] focus:ring-0 w-4 h-4"
+                className="rounded border-amber-400 text-[#3B82F6] focus:ring-[#3B82F6] w-4 h-4 accent-[#3B82F6]"
               />
               <span>Confirm replacement</span>
             </label>
             {errors.placement && (
-              <p className="text-rose-400 text-xs font-semibold">
+              <p className="text-rose-600 text-xs font-semibold">
                 {errors.placement}
               </p>
             )}
@@ -356,36 +363,37 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
       </div>
 
       {/* ── Product Image ───────────────────────────────────────────────────── */}
-      <div className="p-3.5 rounded-2xl bg-[#0e1220] border border-slate-700/80 space-y-3">
+      <div className="p-4 rounded-xl bg-[#F5F6F8] border border-[#EDEDED] space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-slate-300">
+          <label className="text-xs font-semibold text-[#111827]">
             Product Image <span className="text-rose-500">*</span>
           </label>
-          {/* Toggle between upload and URL modes */}
-          <div className="flex items-center gap-1 bg-slate-800 rounded-lg p-0.5">
-            <button
-              type="button"
-              onClick={() => setUploadMode('file')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
-                uploadMode === 'file'
-                  ? 'bg-[#ff3366] text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Upload className="w-3 h-3" />
-              Upload
-            </button>
+          
+          {/* Toggle between upload and URL modes — Blue accent for active */}
+          <div className="flex items-center gap-1 bg-white border border-[#EDEDED] rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => setUploadMode('url')}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
                 uploadMode === 'url'
-                  ? 'bg-[#ff3366] text-white'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#3B82F6] text-white shadow-2xs'
+                  : 'text-[#6B7280] hover:text-[#111827]'
               }`}
             >
               <LinkIcon className="w-3 h-3" />
               URL
+            </button>
+            <button
+              type="button"
+              onClick={() => setUploadMode('file')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors ${
+                uploadMode === 'file'
+                  ? 'bg-[#3B82F6] text-white shadow-2xs'
+                  : 'text-[#6B7280] hover:text-[#111827]'
+              }`}
+            >
+              <Upload className="w-3 h-3" />
+              Upload
             </button>
           </div>
         </div>
@@ -394,14 +402,14 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
           /* ── File Upload ── */
           <div className="space-y-2">
             {!isCloudinaryConfigured && (
-              <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                <span>Cloudinary not configured — set <code className="font-mono">VITE_CLOUDINARY_CLOUD_NAME</code> in <code className="font-mono">.env</code> to enable direct file uploads.</span>
+              <div className="flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
+                <span>Cloudinary not configured — set <code className="font-mono bg-white px-1 rounded border border-amber-200">VITE_CLOUDINARY_CLOUD_NAME</code> in <code className="font-mono bg-white px-1 rounded border border-amber-200">.env</code> to enable direct file uploads.</span>
               </div>
             )}
 
             <label className={`flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
-              isUploading ? 'border-slate-600 bg-slate-900/50' : 'border-slate-600 hover:border-[#ff3366] bg-[#121624]'
+              isUploading ? 'border-[#EDEDED] bg-gray-50' : 'border-[#D1D5DB] hover:border-[#3B82F6] bg-white'
             }`}>
               <input
                 ref={fileInputRef}
@@ -412,17 +420,17 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
                 className="hidden"
               />
               {isUploading ? (
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#ff3366]" />
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#111827]">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#3B82F6]" />
                   <span>Uploading to Cloudinary...</span>
                 </div>
               ) : (
                 <div className="text-center space-y-1">
-                  <Upload className="w-5 h-5 text-slate-400 mx-auto" />
-                  <p className="text-xs text-slate-400">
+                  <Upload className="w-5 h-5 text-[#6B7280] mx-auto" />
+                  <p className="text-xs text-[#111827] font-medium">
                     Click to browse or drag &amp; drop
                   </p>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-[#9CA3AF]">
                     JPG, PNG, WebP · max 5 MB
                   </p>
                 </div>
@@ -430,7 +438,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
             </label>
 
             {uploadError && (
-              <p className="text-rose-400 text-xs flex items-start gap-1.5">
+              <p className="text-rose-500 text-xs flex items-start gap-1.5 font-medium">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 <span>{uploadError}</span>
               </p>
@@ -445,42 +453,44 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
               value={formData.image_url}
               onChange={handleChange}
               placeholder="https://res.cloudinary.com/... or any image URL"
-              className="w-full bg-[#121624] border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+              className="w-full bg-white border border-[#EDEDED] rounded-xl pl-9 pr-4 py-2 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
             />
-            <LinkIcon className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+            <LinkIcon className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-3" />
           </div>
         )}
 
         {errors.image_url && (
-          <p className="text-rose-400 text-xs flex items-center gap-1">
+          <p className="text-rose-500 text-xs flex items-center gap-1 font-medium">
             <AlertCircle className="w-3 h-3" /> {errors.image_url}
           </p>
         )}
 
-        {/* Image preview — shown regardless of upload mode */}
+        {/* Image preview */}
         {formData.image_url && (
-          <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-900 border border-slate-800">
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-[#EDEDED] shadow-2xs">
             <div className="relative w-14 h-14 flex-shrink-0">
               <img
                 src={formData.image_url}
                 alt="Preview"
-                className="w-14 h-14 object-cover rounded-lg bg-slate-800"
+                className="w-14 h-14 object-cover rounded-lg bg-gray-50 border border-[#EDEDED]"
                 onError={(e) => { e.target.style.display = 'none' }}
               />
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-600 rounded-full flex items-center justify-center text-white"
+                className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 rounded-full flex items-center justify-center text-white hover:bg-rose-600 transition-colors shadow-2xs"
                 title="Remove image"
               >
                 <X className="w-2.5 h-2.5" />
               </button>
             </div>
-            <div className="text-xs text-slate-400 min-w-0">
-              <p className="text-white font-medium">Image Preview</p>
-              <p className="truncate text-[11px]">{formData.image_url}</p>
+            <div className="text-xs text-[#6B7280] min-w-0">
+              <p className="text-[#111827] font-semibold">Image Preview</p>
+              <p className="truncate text-[11px] text-[#9CA3AF]">{formData.image_url}</p>
               {formData.image_url.includes('res.cloudinary.com') && (
-                <p className="text-emerald-400 text-[10px] font-semibold mt-0.5">✓ Cloudinary CDN</p>
+                <p className="text-emerald-600 text-[10px] font-semibold mt-0.5 flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Cloudinary CDN
+                </p>
               )}
             </div>
           </div>
@@ -489,7 +499,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
 
       {/* Description */}
       <div>
-        <label className="block text-xs font-semibold text-slate-300 mb-1">
+        <label className="block text-xs font-semibold text-[#111827] mb-1.5">
           Product Description
         </label>
         <textarea
@@ -497,24 +507,24 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
           rows={3}
           value={formData.description}
           onChange={handleChange}
-          placeholder="Detailed product description..."
-          className="w-full bg-[#121624] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#ff3366]"
+          placeholder="Detailed product description, scale, packaging, and authenticity notes..."
+          className="w-full bg-white border border-[#EDEDED] rounded-xl px-3.5 py-2 text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
         />
       </div>
 
       {/* Modal Actions */}
-      <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-3">
+      <div className="pt-3 border-t border-[#EDEDED] flex items-center justify-end gap-2.5">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+          className="px-4 py-2 rounded-xl text-xs font-semibold text-[#4B5563] bg-white border border-[#EDEDED] hover:bg-gray-50 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || isUploading}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff3366] to-[#8b5cf6] text-white text-xs font-bold shadow-glow-primary hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+          className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 text-white text-xs font-bold shadow-2xs transition-colors disabled:opacity-50 flex items-center gap-2"
         >
           {isUploading ? (
             <>
@@ -522,7 +532,7 @@ export default function ProductForm({ initialProduct = null, onSubmit, onCancel,
               <span>Uploading...</span>
             </>
           ) : (
-            <span>{initialProduct ? 'Update Product' : 'Add to Catalog'}</span>
+            <span>{initialProduct ? 'Update Product' : 'Save Product'}</span>
           )}
         </button>
       </div>

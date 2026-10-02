@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
-import { MessageSquare, CheckCircle, Clock, Truck, XCircle, Eye, Phone, MapPin, QrCode } from 'lucide-react'
+import { MessageSquare, CheckCircle, Clock, Truck, XCircle, Eye, Phone, MapPin, QrCode, Trash2 } from 'lucide-react'
 import { formatPrice } from '../../utils/formatPrice'
 import { OrderStatusBadge } from '../common/Badge'
 import { OWNER_UPI_ID } from '../../lib/clerkClient'
 import Modal from '../common/Modal'
 import { cldUrl } from '../../lib/cloudinary'
 
-export default function OrderTable({ orders, onUpdateStatus }) {
+export default function OrderTable({ orders, onUpdateStatus, onDeleteOrder }) {
   const [inspectOrder, setInspectOrder] = useState(null)
   const [showQrModal, setShowQrModal] = useState(null)
+  const [deleteCandidate, setDeleteCandidate] = useState(null)
 
   const statuses = [
     { value: 'pending', label: '1. Pending QR' },
@@ -158,15 +159,27 @@ export default function OrderTable({ orders, onUpdateStatus }) {
                     </div>
                   </td>
 
-                  {/* Inspect Details */}
+                  {/* Inspect Details & Delete */}
                   <td className="px-5 py-3.5 text-right">
-                    <button
-                      onClick={() => setInspectOrder(order)}
-                      className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#111827] hover:bg-gray-100 transition-colors"
-                      title="Inspect full order"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => setInspectOrder(order)}
+                        className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#111827] hover:bg-gray-100 transition-colors"
+                        title="Inspect full order"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+
+                      {onDeleteOrder && (
+                        <button
+                          onClick={() => setDeleteCandidate(order)}
+                          className="p-1.5 rounded-lg text-[#9CA3AF] hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          title="Delete Order"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </td>
 
                 </tr>
@@ -333,6 +346,45 @@ export default function OrderTable({ orders, onUpdateStatus }) {
               <MessageSquare className="w-4 h-4" />
               <span>Send QR Link to Buyer's WhatsApp</span>
             </a>
+          </div>
+        )}
+      </Modal>
+
+      {/* Delete Order Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(deleteCandidate)}
+        onClose={() => setDeleteCandidate(null)}
+        title="Delete Order"
+      >
+        {deleteCandidate && (
+          <div className="space-y-4 text-xs text-[#374151]">
+            <p>
+              Are you sure you want to permanently delete order <strong className="text-[#111827]">#{deleteCandidate.id}</strong> placed by <strong className="text-[#111827]">{deleteCandidate.buyer_name}</strong>?
+            </p>
+            <p className="text-[11px] text-[#6B7280]">
+              This will remove the order and its items from both the local store and Supabase.
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#EDEDED]">
+              <button
+                type="button"
+                onClick={() => setDeleteCandidate(null)}
+                className="px-3.5 py-1.5 rounded-lg border border-[#EDEDED] text-xs font-semibold text-[#4B5563] hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (onDeleteOrder) {
+                    await onDeleteOrder(deleteCandidate.id)
+                  }
+                  setDeleteCandidate(null)
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-rose-600 text-xs font-semibold text-white hover:bg-rose-700 shadow-2xs transition-colors"
+              >
+                Delete Order
+              </button>
+            </div>
           </div>
         )}
       </Modal>

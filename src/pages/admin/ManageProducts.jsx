@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
-import { Plus, Search, Filter, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Plus, Search, Filter, RefreshCw, Tags } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import ProductTable from '../../components/admin/ProductTable'
 import ProductForm from '../../components/admin/ProductForm'
 import Modal from '../../components/common/Modal'
 
 export default function ManageProducts() {
-  const { products, addProduct, updateProduct, deleteProduct, toggleSoldOut, resetCatalog } = useApp()
+  const { products, categories = [], addProduct, updateProduct, deleteProduct, toggleSoldOut, resetCatalog } = useApp()
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -14,8 +15,12 @@ export default function ManageProducts() {
   const [categoryFilter, setCategoryFilter] = useState('all')
 
   const distinctCategories = Array.from(
-    new Set(products.map(p => p.series || p.category).filter(Boolean))
+    new Set([
+      ...categories.map(c => c.name),
+      ...products.map(p => p.series || p.category).filter(Boolean)
+    ])
   ).sort()
+
 
   const filteredProducts = products.filter((p) => {
     const q = searchFilter.toLowerCase().trim()
@@ -60,6 +65,15 @@ export default function ManageProducts() {
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <Link
+            to="/admin/categories"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#EDEDED] bg-white hover:bg-gray-50 text-xs font-semibold text-[#4B5563] shadow-2xs transition-all"
+            title="Manage store categories and ordering"
+          >
+            <Tags className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <span>Manage Categories</span>
+          </Link>
+
           <button
             onClick={() => resetCatalog()}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#EDEDED] bg-white hover:bg-gray-50 text-xs font-semibold text-[#4B5563] shadow-2xs transition-all"
@@ -77,6 +91,7 @@ export default function ManageProducts() {
             <span>Add New Product</span>
           </button>
         </div>
+
       </div>
 
       {/* Filter and Search Bar */}

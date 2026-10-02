@@ -7,7 +7,8 @@ import React from 'react'
  * admin-styled with coloured backgrounds).
  */
 export function StockBadge({ inStock, stock }) {
-  if (!inStock || stock <= 0) {
+  const isOutOfStock = inStock === false || (stock !== undefined && stock !== null && stock !== '' && Number(stock) <= 0)
+  if (isOutOfStock) {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-[12px] text-xs font-semibold bg-white border border-[#E5E5E5] text-[#111111] font-['Inter']">
         Sold Out
